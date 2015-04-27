@@ -3,10 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/franco/NetBeansProjects/PomboCliente/src/ufgd/redes/JanelaMain.java</file>
-            <file>file:/home/franco/NetBeansProjects/PomboCliente/src/ufgd/redes/JanelaLogin.java</file>
-            <file>file:/home/franco/NetBeansProjects/PomboCliente/src/ufgd/redes/model/Usuario.java</file>
-            <file>file:/home/franco/NetBeansProjects/PomboCliente/src/ufgd/redes/PanelConversa.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/JanelaMain.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/socket/MySocket.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/PanelConversa.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/controllers/Controller.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/socket/ReceiveRunnable.java</file>
         </group>
     </open-files>
 </project-private>
