@@ -34,22 +34,22 @@ public class ConnectCliente implements Runnable {
      * Socket que mantem conexão com o cliente.
      */
     Socket socketCliente;
-    
+
     /**
      * Responsável por receber mensagens do cliente.
      */
     Scanner receive;
-    
+
     /**
      * Responsável por enviar mensagens para o cliente.
      */
     PrintStream sender;
-    
+
     /**
      * Cliente "dono" da thread.
      */
     Usuario usuario;
-    
+
     /**
      * Lista de usuarios online no sistemas.
      */
@@ -57,9 +57,10 @@ public class ConnectCliente implements Runnable {
 
     /**
      * Construtor
+     *
      * @param socketCliente
      * @param usuariosOnline
-     * @throws IOException 
+     * @throws IOException
      */
     public ConnectCliente(Socket socketCliente, Map<String, PrintStream> usuariosOnline) throws IOException {
         this.socketCliente = socketCliente;
@@ -67,36 +68,43 @@ public class ConnectCliente implements Runnable {
         sender = new PrintStream(socketCliente.getOutputStream());
         this.usuariosOnline = usuariosOnline;
     }
-    
-    
+
     /**
      * Função executada ao iniciar Thread.
      */
     @Override
     public void run() {
         System.out.println("#conexão ESTABELECIDA com o cliente " + socketCliente.getInetAddress().getHostAddress() + " #");
+
+        /**
+         * 1º PASSO: espera usuario se logar.
+         */
+        while (receive.hasNextLine()) {
+            if (initAutenticacao()) {
+                break;
+            }
+        }
+        /**
+         * 2º PASSO: envia lista de usuarios.
+         */
+        while (receive.hasNextLine()) {
+            enviarListaUsuarios();
+            break;
+        }
+        /**
+         * 3º PASSO: inicia a comunicação de troca de mensagens do bate papo.
+         */
+        while (receive.hasNextLine()) {
+            initComunicacao();
+        }
+
+        /**
+         * 4º PASSO: encerrra conexão com cliente.
+         */
         try {
-            /** 1º PASSO: espera usuario se logar **/
-            while (receive.hasNextLine()) {
-                if(initAutenticacao())
-                    break;
-            }
-            /** 2º PASSO:  envia lista de usuarios**/
-            while (receive.hasNextLine()) {
-                enviarListaUsuarios();
-            }
-            /** 3º PASSO: inicia a comunicação de troca de mensagens do bate papo **/
-            while (receive.hasNextLine()) {
-                initComunicacao();
-            }
+            encerraConexao();
         } catch (IOException ex) {
-            Logger.getLogger(PomboServidor.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            try {
-                encerraConexao();
-            } catch (IOException ex) {
-                Logger.getLogger(ConnectCliente.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Logger.getLogger(ConnectCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("#Conexão ENCERRADA com o cliente " + socketCliente.getInetAddress().getHostAddress() + " #");
     }
@@ -108,25 +116,26 @@ public class ConnectCliente implements Runnable {
         String json = receive.nextLine();
         Map<String, String> dados = new Gson().fromJson(json, Map.class);
         String tipo = dados.get("tipo");
-        if(tipo.equals("list_all_users")){
+        if (tipo.equals("list_all_users")) {
             List<Usuario> usuarios = new DAOUsuario().listAll(usuario.getUsername());
             //altera quem está online
-            for(Usuario u : usuarios){
-                if(usuariosOnline.containsKey(u.getUsername()))
+            for (Usuario u : usuarios) {
+                if (usuariosOnline.containsKey(u.getUsername())) {
                     u.setAtivo(true);
+                }
             }
             sender.println(new Gson().toJson(usuarios));
         }
     }
 
     /**
-     * Valida comunicação inicial entre cliente e servidor
-     * verifica se usuario está fazendo login ou criando nova conta,
-     * Retonra true apenas quando usuario consegue fazer login
-     * 
-     * @return 
+     * Valida comunicação inicial entre cliente e servidor verifica se usuario
+     * está fazendo login ou criando nova conta, Retonra true apenas quando
+     * usuario consegue fazer login
+     *
+     * @return
      */
-    private boolean initAutenticacao(){
+    private boolean initAutenticacao() {
         boolean result = false;
         //recebe json enviado pelo usuario
         String json = receive.nextLine();
@@ -139,8 +148,6 @@ public class ConnectCliente implements Runnable {
         //vericia se usuario deseja fazer login
         if (tipo.equals("auth")) {
             if (autenticarUsuario(username, password)) {
-                //enviar lista de usuarios do sistema
-                enviarListaUsuarios();
                 result = true;
             }
         }
@@ -150,20 +157,24 @@ public class ConnectCliente implements Runnable {
             criarConta(username, password);
         }
         return result;
-    } 
-    
-    /**
-     * Inicia loop de comunicação infinita com cliente, ou até cliente
-     * encerrar comunicação.
-     * @throws IOException 
-     */
-    private void initComunicacao() throws IOException {
+    }
 
+    /**
+     * Inicia loop de comunicação infinita com cliente, ou até cliente encerrar
+     * comunicação.
+     *
+     * @throws IOException
+     */
+    private void initComunicacao() {
+        Gson gson = new Gson();
         //le json enviado pelo remetente
         String json = receive.nextLine();
         //recupera mensagens de dados do remetente, que contem usuario destinatario e mensagem.
-        Message message = new Gson().fromJson(json, Message.class);
+        Message message = gson.fromJson(json, Message.class);
+        //adiciona remetente na mensagem
         message.setRemetente(usuario.getUsername());
+        System.out.println("Mensagem transmitida: de '"+message.getRemetente()+"' para '"+message.getDestinatario()+"'");
+        
         //recuperara destinatario da mensagem
         String destinatario = message.getDestinatario();
         //recupera printStream do destinatario para enviar a mensagem
@@ -171,7 +182,7 @@ public class ConnectCliente implements Runnable {
         //se sender estiver online envia mensagem
         if (senderDestinatario != null) {
             //envia mensagem ao destinatario
-            senderDestinatario.println(json);
+            senderDestinatario.println(gson.toJson(message));
         } //se nao estiver online entao salve a mensagem para enviar quando estiver online
         else {
             //...
@@ -236,18 +247,22 @@ public class ConnectCliente implements Runnable {
         }
         return null;
     }
-    
+
     /**
      * Finaliza objetos responsáveis pela comunicação entre cliente e servidor
-     * @throws IOException 
+     *
+     * @throws IOException
      */
-    public void encerraConexao() throws IOException{
+    public void encerraConexao() throws IOException {
         //FINALIZA CONEXÃO
         //remove usuario da lista de usuarios online
-        if(usuario!=null)//verifica se chegou a ser instanciado o objeto do usuario
-            if(usuariosOnline.containsKey(usuario.getUsername()))//verifica se usuario chegou a completar login
+        if (usuario != null)//verifica se chegou a ser instanciado o objeto do usuario
+        {
+            if (usuariosOnline.containsKey(usuario.getUsername()))//verifica se usuario chegou a completar login
+            {
                 usuariosOnline.remove(usuario.getUsername());//remove usuario da lista de usuarios online
-        //fechar Scanner
+            }        //fechar Scanner
+        }
         receive.close();
         //fecha PrintStram
         sender.close();
