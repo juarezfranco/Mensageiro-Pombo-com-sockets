@@ -170,8 +170,7 @@ public class PanelConversa extends javax.swing.JPanel {
         String msg = textFieldEntrada.getText().replaceAll("^\\s+", "");
         if(msg.isEmpty())
             return;
-        //limpa campo de texto da msg
-        textFieldEntrada.setText("");
+        
         
         try {
             //adiciona texto na area de texto (EditorPane).
@@ -185,7 +184,8 @@ public class PanelConversa extends javax.swing.JPanel {
             //exibe log de erro no terminal
             Logger.getLogger(PanelConversa.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+        //limpa campo de texto da msg
+        textFieldEntrada.setText("");
         
     }//GEN-LAST:event_btEnviarMensagemActionPerformed
 

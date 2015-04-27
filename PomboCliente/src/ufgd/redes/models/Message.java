@@ -30,6 +30,7 @@ public class Message {
     public Message(){}
     public Message(String destinatario, String msg){
         this.destinatario = destinatario;
+        this.msg = msg;
     }
     
     public String getRemetente() {
@@ -66,6 +67,7 @@ public class Message {
      * @return json
      */
     public String toJson() {
+        
         return new Gson().toJson(this);
     }
 }

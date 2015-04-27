@@ -8,16 +8,15 @@ package ufgd.redes.socket;
 import com.google.gson.Gson;
 import ufgd.redes.controllers.Controller;
 import ufgd.redes.models.Message;
-import ufgd.redes.models.Usuario;
 
 /**
  * Classe responsável por receber mensagens do servidor
  * @author franco
  */
-public class ReceiveRunnable implements Runnable{
+public class ReceiveMessage implements Runnable{
     MySocket socket;
     Controller controller;
-    public ReceiveRunnable(Controller controller){
+    public ReceiveMessage(Controller controller){
         this.controller = controller;
         this.socket     = controller.getSocket();
     }
@@ -27,7 +26,7 @@ public class ReceiveRunnable implements Runnable{
         while(true){
             String jsonResponse = socket.receiveToServer();
             Message message   = new Gson().fromJson(jsonResponse, Message.class);
-            //controller sabe o que fazer com a mensagem
+            //passa mensagem para o controller, ele sabe o que fazer com a mensagem
             controller.gerenciarNovaMensagem(message);
         }
     }
