@@ -21,7 +21,8 @@ public class PomboServidor {
      * Lista de usuarios onlines
      * Chave: username do usuario, Valor: PrintStream.
      */
-    private static Map<String, PrintStream> usuariosOnline;
+    public static Map<String, PrintStream> usuariosOnline;
+    
     
     /**
      * @param args the command line arguments

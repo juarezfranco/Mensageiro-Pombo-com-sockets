@@ -50,10 +50,7 @@ public class ConnectCliente implements Runnable {
      */
     Usuario usuario;
 
-    /**
-     * Lista de usuarios online no sistemas.
-     */
-    Map<String, PrintStream> usuariosOnline;
+    
 
     /**
      * Construtor
@@ -66,7 +63,7 @@ public class ConnectCliente implements Runnable {
         this.socketCliente = socketCliente;
         receive = new Scanner(socketCliente.getInputStream());
         sender = new PrintStream(socketCliente.getOutputStream());
-        this.usuariosOnline = usuariosOnline;
+        PomboServidor.usuariosOnline = usuariosOnline;
     }
 
     /**
@@ -120,7 +117,7 @@ public class ConnectCliente implements Runnable {
             List<Usuario> usuarios = new DAOUsuario().listAll(usuario.getUsername());
             //altera quem está online
             for (Usuario u : usuarios) {
-                if (usuariosOnline.containsKey(u.getUsername())) {
+                if (PomboServidor.usuariosOnline.containsKey(u.getUsername())) {
                     u.setAtivo(true);
                 }
             }
@@ -202,7 +199,7 @@ public class ConnectCliente implements Runnable {
             //envia resposta para usuario dizendo que está autorizado
             sender.println(OK);
             //adiciona usuario para lista de usuarios
-            usuariosOnline.put(usuario.getUsername(), sender);
+            PomboServidor.usuariosOnline.put(usuario.getUsername(), sender);
             return true;
         } else {
             //envia resposta para usuario dizendo que está sem autorização para login
@@ -241,9 +238,9 @@ public class ConnectCliente implements Runnable {
      */
     private PrintStream getPrintStreamDestinatario(String username) {
         //verifica se usuario esta online
-        if (usuariosOnline.containsKey(username)) {
+        if (PomboServidor.usuariosOnline.containsKey(username)) {
             //retorna printStream do usuario destinatario
-            return usuariosOnline.get(username);
+            return PomboServidor.usuariosOnline.get(username);
         }
         return null;
     }
@@ -258,9 +255,9 @@ public class ConnectCliente implements Runnable {
         //remove usuario da lista de usuarios online
         if (usuario != null)//verifica se chegou a ser instanciado o objeto do usuario
         {
-            if (usuariosOnline.containsKey(usuario.getUsername()))//verifica se usuario chegou a completar login
+            if (PomboServidor.usuariosOnline.containsKey(usuario.getUsername()))//verifica se usuario chegou a completar login
             {
-                usuariosOnline.remove(usuario.getUsername());//remove usuario da lista de usuarios online
+                PomboServidor.usuariosOnline.remove(usuario.getUsername());//remove usuario da lista de usuarios online
             }        //fechar Scanner
         }
         receive.close();
