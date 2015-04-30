@@ -167,6 +167,7 @@ public class JanelaMain extends javax.swing.JFrame {
         }//se não existe aba aberta é preciso criar nova aba
         else{
             //adiciona nova aba no componente TabbedPane
+            
             jTabbedPane.addTab(contato.getUsername(), new PanelConversa(this, contato));
             //seleciona para exibir nova aba que foi criada
             jTabbedPane.setSelectedIndex(jTabbedPane.getTabCount()-1);
