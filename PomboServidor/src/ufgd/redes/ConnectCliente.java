@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -18,6 +19,7 @@ import ufgd.redes.dao.DAOUsuario;
 import ufgd.redes.models.Message;
 import ufgd.redes.models.Usuario;
 import static ufgd.redes.utils.Constantes.AUTH;
+import static ufgd.redes.utils.Constantes.ENCERRAR_SESSAO;
 import static ufgd.redes.utils.Constantes.FOUND;
 import static ufgd.redes.utils.Constantes.LISTA_CONTATOS;
 import static ufgd.redes.utils.Constantes.NOVA_CONTA;
@@ -44,12 +46,12 @@ public class ConnectCliente implements Runnable {
     /**
      * Responsável por receber mensagens do cliente.
      */
-    Scanner receive;
+    Scanner receiveToClient;
 
     /**
      * Responsável por enviar mensagens para o cliente.
      */
-    PrintStream sender;
+    PrintStream senderToClient;
 
     /**
      * Cliente "dono" da thread.
@@ -72,8 +74,8 @@ public class ConnectCliente implements Runnable {
     public ConnectCliente(Socket socketCliente, Map<String, PrintStream> usuariosOnline) throws IOException {
         this.socketCliente = socketCliente;
         this.isAuth = false;
-        this.receive = new Scanner(socketCliente.getInputStream());
-        this.sender = new PrintStream(socketCliente.getOutputStream());
+        this.receiveToClient = new Scanner(socketCliente.getInputStream());
+        this.senderToClient = new PrintStream(socketCliente.getOutputStream());
         PomboServidor.usuariosOnline = usuariosOnline;
     }
 
@@ -84,8 +86,8 @@ public class ConnectCliente implements Runnable {
     public void run() {
         System.out.println("#conexão ESTABELECIDA com o cliente " + socketCliente.getInetAddress().getHostAddress() + " #");
 
-        while (receive.hasNextLine()) {
-            novaComunicacao(receive.nextLine());
+        while (receiveToClient.hasNextLine()) {
+            novaComunicacao(receiveToClient.nextLine());
         }
         avisarOffline();
         
@@ -113,9 +115,6 @@ public class ConnectCliente implements Runnable {
             case AUTH:
                 autenticarUsuario(message);
                 break;
-            case LISTA_CONTATOS:
-                if(isAuth) enviarListaUsuarios();
-                break;
             case NOVA_CONTA:
                 criarConta(message);
                 break;
@@ -125,32 +124,50 @@ public class ConnectCliente implements Runnable {
         }
         
     }
+    private void encerrarSessaoAntiga(String username){
+        Message message = new Message();
+        message.setTipo(ENCERRAR_SESSAO);
+        PrintStream printOld = PomboServidor.usuariosOnline.get(username);
+        printOld.println(message.toJson());
+    }
     private void autenticarUsuario(Message message){
         String username = message.getRemetente().getUsername().toLowerCase();
         String password = message.getRemetente().getPassword();
         
         DAOUsuario dao = new DAOUsuario();
         if(dao.autentica(username,password)){
+            if(PomboServidor.usuariosOnline.containsKey(username)){
+                encerrarSessaoAntiga(username);
+            }
             //envia resposta para usuario dizendo que está autorizado
-            this.sender.println(OK);
+            this.senderToClient.println(OK);
             //flag de autorização para cliente enviar msg para outros
             this.isAuth=true;
             //salva usuario corrente
-            this.usuario = message.getRemetente();
-            this.usuario.setUsername(username);
+            this.usuario = dao.getUsuario(username);
             //limpa a senha deste usuario para não enviar senha a outros usuarios
             this.usuario.setPassword(null);
             //adiciona usuario para lista de usuarios online
-            PomboServidor.usuariosOnline.put(usuario.getUsername(), sender);
+            PomboServidor.usuariosOnline.put(usuario.getUsername(), senderToClient);
             //envia lista de usuarios para cliente
-            enviarListaUsuarios();
+            List<Usuario> listaUsuarios = dao.listarTodosUsuarios(usuario.getUsername());
+            enviarListaUsuarios(listaUsuarios);
+            //envia mensagens pendentes
+            List<Message> mensagens = dao.listarMensagensPendentes(usuario);
+            enviarMensagensPendentes(mensagens);
             avisarOnline();
         }else{
             //envia resposta para usuario dizendo que está sem autorização para login
-            sender.println(SEM_AUTORIZACAO);
+            senderToClient.println(SEM_AUTORIZACAO);
         }
     }
-     
+     private void enviarMensagensPendentes(List<Message> mensagensPendentes){
+         for(Message message : mensagensPendentes){
+             senderToClient.println(message.toJson());
+             DAOUsuario dao = new DAOUsuario();
+             dao.removerMensagemPendente(message.getId());
+         }
+     }
     /**
      * Método responsável por criar conta do usuario, só deve criar se username não existir
      * @param message 
@@ -165,10 +182,10 @@ public class ConnectCliente implements Runnable {
             dao.inserir(message.getRemetente());
             System.out.println(": Nova conta criada: USERNAME "+username);
             //envia resposta ao usuario
-            sender.println(OK);
+            senderToClient.println(OK);
         } else {
             //envia resposta ao usuario
-            sender.println(FOUND);
+            senderToClient.println(FOUND);
         }
     }            
     
@@ -199,22 +216,20 @@ public class ConnectCliente implements Runnable {
     /**
      * Método responsável por envia lista de todos os usuarios.
      */
-    private void enviarListaUsuarios() {
+    private void enviarListaUsuarios(List<Usuario> usuarios) {
         Message message = new Message();
         //seta tipo da mensagem
         message.setTipo(LISTA_CONTATOS);
-        //recupera todos os usuario do banco de dados
-        List<Usuario> usuarios = new DAOUsuario().listAll(usuario.getUsername());
         //altera quem está online
         for (Usuario u : usuarios) {
             if (PomboServidor.usuariosOnline.containsKey(u.getUsername())) {
                 u.setAtivo(true);
             }
         }
-        //Transforma lista de usuarios em JSON e adicona como corpo da Mensagem
+        //Transforma lista de usuarios em JSON e adiciona como corpo da Mensagem
         message.setMsg(new Gson().toJson(usuarios));
         //transforma mensagem em JSON e envia para cliente;
-        sender.println(message.toJson());
+        senderToClient.println(message.toJson());
         
     }
 
@@ -225,19 +240,22 @@ public class ConnectCliente implements Runnable {
      * @param message 
      */
     private void enviarMensagemParaDestinatario(Message message){
+        
         //adiciona remetente na mensagem
         message.setRemetente(usuario);
-        System.out.println(": Nova mensagem transmitida: de '"+message.getRemetente().getUsername()+"' para '"+message.getDestinatario().getUsername()+"'");
+        message.setData(new Date());
         //recupera printStream do destinatario para enviar a mensagem
         PrintStream senderDestinatario = getPrintStreamDestinatario(message.getDestinatario());
-        //se sender estiver online envia mensagem
+        //se sender do Cliente estiver online envia mensagem
         if (senderDestinatario != null) {
+            System.out.println(": Nova mensagem transmitida: de '"+message.getRemetente().getUsername()+"' para '"+message.getDestinatario().getUsername()+"'");
             //envia mensagem ao destinatario
             senderDestinatario.println(new Gson().toJson(message));
         } 
         //se nao estiver online entao salve a mensagem para enviar quando estiver online
         else {
-            //...
+            DAOUsuario dao = new DAOUsuario();
+            dao.guardarMensagem(message);
         }
     }
 
@@ -263,6 +281,7 @@ public class ConnectCliente implements Runnable {
      * @throws IOException
      */
     public void encerraConexao() throws IOException {
+        
         //FINALIZA CONEXÃO
         //remove usuario da lista de usuarios online
         if (usuario != null)//verifica se chegou a ser instanciado o objeto do usuario
@@ -271,12 +290,13 @@ public class ConnectCliente implements Runnable {
             {
                 PomboServidor.usuariosOnline.remove(usuario.getUsername());//remove usuario da lista de usuarios online
             }        //fechar Scanner
+            usuario=null;
         }
-        if(receive!=null)
-            receive.close();
+        if(receiveToClient!=null)
+            receiveToClient.close();
         //fecha PrintStram
-        if(sender!=null)
-            sender.close();
+        if(senderToClient!=null)
+            senderToClient.close();
         //fecha socket do usuario
         if(socketCliente!=null)
             socketCliente.close();

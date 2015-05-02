@@ -6,7 +6,6 @@
 package ufgd.redes.views.components;
 
 import java.awt.Component;
-import java.util.Random;
 import javax.swing.Icon;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;

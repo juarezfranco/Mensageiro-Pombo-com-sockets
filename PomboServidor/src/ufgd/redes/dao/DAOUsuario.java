@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import ufgd.redes.models.Message;
 import ufgd.redes.models.Usuario;
+import static ufgd.redes.utils.Constantes.NOVA_MENSAGEM;
 
 /**
  * Classe responsável por realizar CRUD com banco de dados
@@ -18,7 +20,8 @@ public class DAOUsuario extends ConnectionFactory {
     /**
      * Nome da tabela no banco relativo ao modelo Usuario.
      */
-    public static final String TABELA = "usuario";
+    public static final String TABELA_USUARIOS = "usuarios";
+    public static final String TABELA_MSG_PENDENTES="mensagens_pendentes";
 
     
     public DAOUsuario() {
@@ -31,7 +34,7 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public boolean inserir(Usuario usuario) {
         boolean result = true;
-        String sql = "INSERT INTO " + TABELA + " (username, password,image) VALUES (? ,?,?)";
+        String sql = "INSERT INTO " + TABELA_USUARIOS + " (username, password,image) VALUES (? ,?,?)";
         
         PreparedStatement stmt=null;
         
@@ -58,7 +61,7 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public boolean autentica(String username, String password){
         boolean result = false;
-        String sql = "SELECT id FROM "+TABELA+" WHERE username = ? AND password = ? LIMIT 1";
+        String sql = "SELECT username FROM "+TABELA_USUARIOS+" WHERE username = ? AND password = ? LIMIT 1";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         
@@ -83,9 +86,9 @@ public class DAOUsuario extends ConnectionFactory {
      * @param username
      * @return 
      */
-    public List<Usuario> listAll(String username){
+    public List<Usuario> listarTodosUsuarios(String username){
         boolean result = false;
-        String sql = "SELECT username, image FROM "+TABELA+" WHERE username != ? ORDER BY username ASC";
+        String sql = "SELECT username, image FROM "+TABELA_USUARIOS+" WHERE username != ? ORDER BY username ASC";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Usuario> usuarios = new ArrayList();
@@ -114,7 +117,7 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public boolean existe(String username) {
         boolean result = false;
-        String sql = "SELECT id FROM "+TABELA+" WHERE username = ? LIMIT 1";
+        String sql = "SELECT username FROM "+TABELA_USUARIOS+" WHERE username = ? LIMIT 1";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         
@@ -131,5 +134,82 @@ public class DAOUsuario extends ConnectionFactory {
             fecharConexao(stmt,rs);
         }
         return result;
+    }
+    
+    public void guardarMensagem(Message message){
+        String sql = "INSERT INTO "+TABELA_MSG_PENDENTES+" (remetente, destinatario, mensagem) VALUES (?,?,?)";
+        PreparedStatement stmt = null;
+        try{
+            stmt = getConexao().prepareStatement(sql);
+            stmt.setString(1, message.getRemetente().getUsername());
+            stmt.setString(2, message.getDestinatario().getUsername());
+            stmt.setString(3, message.getMsg());
+            stmt.execute();
+        }catch(SQLException ex){
+            Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            fecharConexao(stmt,null);
+        }
+    }
+    public void removerMensagemPendente(int id){
+        String sql = "DELETE FROM "+TABELA_MSG_PENDENTES+" WHERE id = ? ";
+        PreparedStatement stmt = null;
+        try{
+            stmt = getConexao().prepareStatement(sql);
+            stmt.setInt(1, id);
+            stmt.execute();
+        }catch(SQLException ex){
+            Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            fecharConexao(stmt,null);
+        }
+    }
+    public List<Message> listarMensagensPendentes(Usuario destinatario){
+        
+        String sql = " SELECT id, remetente, mensagem, data "
+                +    " FROM "+TABELA_MSG_PENDENTES
+                +    " WHERE destinatario = ? ORDER BY data ASC";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<Message> mensagens = new ArrayList<Message>();
+        try{
+            stmt = getConexao().prepareStatement(sql);
+            stmt.setString(1, destinatario.getUsername());
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                Message message = new Message();
+                message.setTipo(NOVA_MENSAGEM);
+                message.setRemetente(new Usuario(rs.getString("remetente")));
+                //message.setDestinatario(destinatario);
+                message.setId(rs.getInt("id"));
+                message.setData(rs.getTimestamp("data"));
+                message.setMsg(rs.getString("mensagem"));
+                mensagens.add(message);
+            }
+        }catch(SQLException ex){
+            Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            fecharConexao(stmt,rs);
+        }
+        return mensagens;
+    }
+    public Usuario getUsuario(String username) {
+        String sql = "SELECT * FROM "+TABELA_USUARIOS+" WHERE username=? LIMIT 1";
+        PreparedStatement stmt = null;
+        Usuario usuario=null;
+        try{
+            stmt = getConexao().prepareStatement(sql);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                usuario = new Usuario();
+                usuario.setUsername(username);
+                usuario.setImage(rs.getInt("image"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return usuario;
     }
 }

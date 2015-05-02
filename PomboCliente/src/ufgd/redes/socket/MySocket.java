@@ -11,7 +11,7 @@ import java.util.Scanner;
  */
 public class MySocket extends Socket{
     
-    private final PrintStream sender;
+    private PrintStream sender;
     private final Scanner receive;
     
     /**
@@ -51,8 +51,10 @@ public class MySocket extends Socket{
     
     @Override
     public void close() throws IOException{
-        if(sender!=null)
+        if(sender!=null){
             sender.close();//finaliza PrintStream
+            sender=null;
+        }
         super.close();
     }
     

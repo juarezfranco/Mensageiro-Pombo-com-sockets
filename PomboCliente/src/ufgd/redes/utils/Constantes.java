@@ -19,6 +19,7 @@ public class Constantes {
     public static final String USER_ONLINE="user_online";
     public static final String NOVA_MENSAGEM="nova_mensagem";
     public static final String LISTA_CONTATOS="lista_contatos";
+    public static final String ENCERRAR_SESSAO="encerrar_sessao";
     /** FIM TIPOS DE MENSAGEM **/
     
     public static final String USER ="user";

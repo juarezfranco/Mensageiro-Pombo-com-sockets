@@ -15,6 +15,7 @@ import static ufgd.redes.utils.Constantes.NOVA_MENSAGEM;
 import static ufgd.redes.utils.Constantes.USER_OFFLINE;
 import static ufgd.redes.utils.Constantes.USER_ONLINE;
 import static ufgd.redes.utils.Constantes.AUTH;
+import static ufgd.redes.utils.Constantes.ENCERRAR_SESSAO;
 import static ufgd.redes.utils.Constantes.LISTA_CONTATOS;
 import static ufgd.redes.utils.Constantes.NOVA_CONTA;
 import static ufgd.redes.utils.Constantes.OK;
@@ -37,10 +38,11 @@ public class Controller {
         usuario = new Usuario();
     }
     public void setContexto(JanelaMain contexto){
+        
         this.contexto = contexto;
     }
     
-    public void gerenciarNovaMensagem(Message message){
+    public void gerenciarNovaMensagem(Message message) {
         String tipo = message.getTipo();
         switch(tipo){
             case NOVA_MENSAGEM:
@@ -55,10 +57,18 @@ public class Controller {
             case LISTA_CONTATOS:
                 listaContatos(message);
                 break;
+            case ENCERRAR_SESSAO:
+                encerrarAplicacao();
+                break;
                 
         }
         
     }
+    private void encerrarAplicacao(){
+        
+        contexto.encerrarAplicaAplicacao();
+    }
+    
     private void listaContatos(Message message){
         //converte mensagem para lista de usuarios
         Type tipo = new TypeToken<List<Usuario>>(){}.getType();
@@ -149,8 +159,10 @@ public class Controller {
      * @throws IOException 
      */
     public void close() throws IOException{
-        if(socket!=null)
+        if(socket!=null){
             socket.close();
+            socket=null;
+        }
     }
     
     

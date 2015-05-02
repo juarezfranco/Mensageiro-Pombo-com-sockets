@@ -10,10 +10,19 @@ import com.google.gson.Gson;
  */
 public class Message {
 
+    int id;
     String tipo;
     Usuario remetente;
     Usuario destinatario;
     String msg;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     
     public String getTipo() {

@@ -1,6 +1,5 @@
 package ufgd.redes.models;
 
-import java.util.Comparator;
 import java.util.Date;
 
 /**

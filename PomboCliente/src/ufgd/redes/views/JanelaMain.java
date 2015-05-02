@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
+import javax.swing.JOptionPane;
 import ufgd.redes.controllers.Controller;
 import ufgd.redes.models.Usuario;
 import ufgd.redes.views.components.ItemToJList;
@@ -221,7 +222,17 @@ public class JanelaMain extends javax.swing.JFrame {
             modeloList.add(contatoOnline);
         }
     }
-    
+    public void encerrarAplicaAplicacao(){
+        
+        try {
+            controller.close();
+        } catch (IOException ex) {
+            Logger.getLogger(JanelaMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        JOptionPane.showMessageDialog(this, "Login foi feito em outro dispositivo, essa sessão será encerrada", "Sessão será encerrada", JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
+        
+    }
     /**
      * Método responsável por atualziar status do contato na lista de contatos
      * @param contatoOffline
@@ -327,12 +338,12 @@ public class JanelaMain extends javax.swing.JFrame {
         public void set(int index, Usuario usuario){
             contatos.set(index, usuario);
             ordenar();
-            this.fireContentsChanged(this, index, index);//atualiza tela
+            this.fireContentsChanged(this, 0, getSize()-1);//atualiza tela
         }
         public void add(Usuario usuario){
             contatos.add(usuario);
             ordenar();
-            this.fireIntervalAdded(usuario, getSize(), getSize());//atualiza tela
+            this.fireIntervalAdded(this, 0, getSize()-1);//atualiza tela
         }
         
         public void ordenar(){

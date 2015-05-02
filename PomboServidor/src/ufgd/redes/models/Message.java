@@ -1,6 +1,7 @@
 package ufgd.redes.models;
 
 import com.google.gson.Gson;
+import java.util.Date;
 
 /**
  * Classe responsável por conter todas informações necessárias para ser enviadas
@@ -10,10 +11,29 @@ import com.google.gson.Gson;
  */
 public class Message {
 
+    int id;
     String tipo;
     Usuario remetente;
     Usuario destinatario;
     String msg;
+    Date data;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    
+    public Date getData() {
+        return data;
+    }
+
+    public void setData(Date data) {
+        this.data = data;
+    }
 
     
     public String getTipo() {
@@ -31,6 +51,7 @@ public class Message {
     public void setRemetente(Usuario remetente) {
         this.remetente = remetente;
     }
+    
 
     public Usuario getDestinatario() {
         return destinatario;
