@@ -1,23 +1,37 @@
 package ufgd.redes.models;
 
+import java.util.Comparator;
 import java.util.Date;
 
 /**
  * Pojo de usuario
  * @author franco
  */
-public class Usuario {
+public class Usuario{
 
     private String username;
     private String password;
+    private int image;
     private boolean ativo=false;
     private Date lastLogin;
     
     public Usuario() {
     }
-
+    public Usuario(String username,String password,int image){
+        this.username = username;
+        this.password = password;
+        this.image=image;
+    }
     public Usuario(String username) {
         this.username = username;
+    }
+
+    public int getImage() {
+        return image;
+    }
+
+    public void setImage(int image) {
+        this.image = image;
     }
     
     public void setUsername(String username) {
@@ -63,5 +77,7 @@ public class Usuario {
             status="(offilne)";
         return username+" "+status;
     }
+
+    
 
 }

@@ -13,13 +13,16 @@ public class Usuario  implements java.io.Serializable {
      private Integer id;
      private String username;
      private String password;
+     private int image;
      private boolean ativo = false;
      private Date lastLogin;
      private Date dateCreate;
 
     public Usuario() {
     }
-
+    public Usuario(String username){
+        this.username=username;
+    }
     public Usuario(String username, String password) {
        this.username = username;
        this.password = password;
@@ -32,8 +35,17 @@ public class Usuario  implements java.io.Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
+
+    public int getImage() {
+        return image;
+    }
+
+    public void setImage(int image) {
+        this.image = image;
+    }
+    
     public String getUsername() {
-        return this.username;
+        return this.username.toLowerCase();
     }
     
     public void setUsername(String username) {

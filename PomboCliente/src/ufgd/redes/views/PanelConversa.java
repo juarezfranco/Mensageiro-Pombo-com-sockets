@@ -5,6 +5,7 @@
  */
 package ufgd.redes.views;
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,15 +67,45 @@ public class PanelConversa extends javax.swing.JPanel {
         //atribui as ferramentas ao editorPane
         textPaneConversa.setEditorKit(kit);
         textPaneConversa.setDocument(doc);
+        
     }
     
     public void novaMensagem(String msg){
         try {
-            kit.insertHTML(doc, doc.getLength(), "\n"+textoContato+msg, 0, 0, null);
-            
+            //insere msg na tela
+            kit.insertHTML(doc, doc.getLength(), "\n\n"+textoContato+msg, 0, 0, null);
+            //posiciona no fim
+            textPaneConversa.setCaretPosition(doc.getLength()-1);
         } catch (BadLocationException | IOException ex) {
             Logger.getLogger(PanelConversa.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    /**
+     * Envia mensagem ao servidor.
+     */
+    private void enviarMensagem(){
+        //recupera msg que será enviada, remove espaços em branco do inicio.
+        String msg = textFieldEntrada.getText().replaceAll("^\\s+", "");
+        if(msg.isEmpty())
+            return;
+        
+        try {
+            //adiciona texto na area de texto (EditorPane).
+            kit.insertHTML(doc, doc.getLength(), "\n"+textoUsuario+msg, 0, 0, null);
+            //posiciona no fim
+            textPaneConversa.setCaretPosition(doc.getLength()-1);
+            //envia mensagem ao servidor.
+            contexto.getController().enviarMensagem(destinatario, msg);
+        //captura erro do kit.inserHTML
+        } catch (BadLocationException | IOException ex ) {
+            //exibe mensagem de erro na tela
+            JOptionPane.showMessageDialog(contexto, "Mensagem inválida", "Pombo diz", JOptionPane.ERROR_MESSAGE);
+            //exibe log de erro no terminal
+            Logger.getLogger(PanelConversa.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //limpa campo de texto da msg
+        textFieldEntrada.setText("");
+        
     }
     /**
      * Método responsável por gerar uma cor aleatoriamente,
@@ -95,13 +126,22 @@ public class PanelConversa extends javax.swing.JPanel {
         textFieldEntrada = new javax.swing.JTextField();
         btEnviarMensagem = new javax.swing.JButton();
         btEnviarArquivo = new javax.swing.JButton();
-        btFecharConversa = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         textPaneConversa = new javax.swing.JTextPane();
 
         setBackground(new java.awt.Color(246, 246, 246));
+        addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                formFocusGained(evt);
+            }
+        });
 
         textFieldEntrada.setFont(new java.awt.Font("Droid Sans", 0, 24)); // NOI18N
+        textFieldEntrada.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textFieldEntradaKeyPressed(evt);
+            }
+        });
 
         btEnviarMensagem.setFont(new java.awt.Font("Droid Sans", 0, 20)); // NOI18N
         btEnviarMensagem.setText("Enviar");
@@ -113,43 +153,35 @@ public class PanelConversa extends javax.swing.JPanel {
 
         btEnviarArquivo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/file64.png"))); // NOI18N
 
-        btFecharConversa.setText(" X - Fechar");
-        btFecharConversa.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btFecharConversaActionPerformed(evt);
+        textPaneConversa.setEditable(false);
+        textPaneConversa.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textPaneConversaFocusGained(evt);
             }
         });
-
-        textPaneConversa.setEditable(false);
         jScrollPane2.setViewportView(textPaneConversa);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(6, 6, 6)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btFecharConversa)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btEnviarArquivo, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(textFieldEntrada, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btEnviarMensagem, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(6, 6, 6))))
+                        .addComponent(btEnviarArquivo, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textFieldEntrada, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btEnviarMensagem, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(6, 6, 6))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(btFecharConversa)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)
+                .addGap(6, 6, 6)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btEnviarMensagem, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -166,38 +198,27 @@ public class PanelConversa extends javax.swing.JPanel {
      * @param evt 
      */
     private void btEnviarMensagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEnviarMensagemActionPerformed
-        //recupera msg que será enviada, remove espaços em branco do inicio.
-        String msg = textFieldEntrada.getText().replaceAll("^\\s+", "");
-        if(msg.isEmpty())
-            return;
-        
-        
-        try {
-            //adiciona texto na area de texto (EditorPane).
-            kit.insertHTML(doc, doc.getLength(), "\n"+textoUsuario+msg, 0, 0, null);
-            //envia mensagem ao servidor.
-            contexto.getController().enviarMensagem(destinatario, msg);
-        //captura erro do kit.inserHTML
-        } catch (BadLocationException | IOException ex ) {
-            //exibe mensagem de erro na tela
-            JOptionPane.showMessageDialog(contexto, "Mensagem inválida", "Pombo diz", JOptionPane.ERROR_MESSAGE);
-            //exibe log de erro no terminal
-            Logger.getLogger(PanelConversa.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        //limpa campo de texto da msg
-        textFieldEntrada.setText("");
+        enviarMensagem();
         
     }//GEN-LAST:event_btEnviarMensagemActionPerformed
 
-    private void btFecharConversaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btFecharConversaActionPerformed
-        contexto.fecharConversa(this, destinatario.getUsername());
-    }//GEN-LAST:event_btFecharConversaActionPerformed
+    private void textFieldEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldEntradaKeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER)
+            enviarMensagem();
+    }//GEN-LAST:event_textFieldEntradaKeyPressed
+
+    private void formFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusGained
+        textFieldEntrada.requestFocus();
+    }//GEN-LAST:event_formFocusGained
+
+    private void textPaneConversaFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textPaneConversaFocusGained
+        textFieldEntrada.requestFocus();
+    }//GEN-LAST:event_textPaneConversaFocusGained
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btEnviarArquivo;
     private javax.swing.JButton btEnviarMensagem;
-    private javax.swing.JButton btFecharConversa;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField textFieldEntrada;
     private javax.swing.JTextPane textPaneConversa;

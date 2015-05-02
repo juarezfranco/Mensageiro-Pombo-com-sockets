@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -41,10 +42,20 @@ public class PomboServidor {
             //cria thread para novo cliente
             new Thread(new ConnectCliente(cliente, usuariosOnline)).start();   
         }
+        
     }
     
-    
-    
-    
-    
+    /**
+     * Função respnsável por enviar mensagem para todos os usuarios online
+     * @param msg 
+     * @param excetoUsuario 
+     */
+    public static void distribuirMensagem(String msg, String excetoUsuario){
+        for(Entry<String,PrintStream>entry : usuariosOnline.entrySet()){
+            if(!excetoUsuario.equals(entry.getKey())){
+                PrintStream print = entry.getValue();
+                print.println(msg);
+            }
+        }
+    }    
 }

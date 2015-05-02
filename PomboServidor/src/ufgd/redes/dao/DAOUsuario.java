@@ -31,14 +31,15 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public boolean inserir(Usuario usuario) {
         boolean result = true;
-        String sql = "INSERT INTO " + TABELA + " (username, password) VALUES (? ,?)";
+        String sql = "INSERT INTO " + TABELA + " (username, password,image) VALUES (? ,?,?)";
         
         PreparedStatement stmt=null;
         
         try {
             stmt = getConexao().prepareStatement(sql);
-            stmt.setString(1, usuario.getUsername());
+            stmt.setString(1, usuario.getUsername().toLowerCase());
             stmt.setString(2, usuario.getPassword());
+            stmt.setInt(3,usuario.getImage());
             stmt.execute();
         } catch (SQLException ex) {
             Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
@@ -84,7 +85,7 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public List<Usuario> listAll(String username){
         boolean result = false;
-        String sql = "SELECT username FROM "+TABELA+" WHERE username != ? ORDER BY username ASC";
+        String sql = "SELECT username, image FROM "+TABELA+" WHERE username != ? ORDER BY username ASC";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Usuario> usuarios = new ArrayList();
@@ -94,7 +95,8 @@ public class DAOUsuario extends ConnectionFactory {
             rs = stmt.executeQuery();
             while(rs.next()){
                 Usuario usuario = new Usuario();
-                usuario.setUsername(rs.getString("username"));
+                usuario.setUsername(rs.getString("username").toLowerCase());
+                usuario.setImage(rs.getInt("image"));
                 usuarios.add(usuario);
             }
         } catch (SQLException ex) {

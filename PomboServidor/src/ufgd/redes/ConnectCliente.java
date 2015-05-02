@@ -17,9 +17,15 @@ import java.util.logging.Logger;
 import ufgd.redes.dao.DAOUsuario;
 import ufgd.redes.models.Message;
 import ufgd.redes.models.Usuario;
+import static ufgd.redes.utils.Constantes.AUTH;
 import static ufgd.redes.utils.Constantes.FOUND;
+import static ufgd.redes.utils.Constantes.LISTA_CONTATOS;
+import static ufgd.redes.utils.Constantes.NOVA_CONTA;
+import static ufgd.redes.utils.Constantes.NOVA_MENSAGEM;
 import static ufgd.redes.utils.Constantes.OK;
 import static ufgd.redes.utils.Constantes.SEM_AUTORIZACAO;
+import static ufgd.redes.utils.Constantes.USER_OFFLINE;
+import static ufgd.redes.utils.Constantes.USER_ONLINE;
 
 /**
  *
@@ -50,6 +56,10 @@ public class ConnectCliente implements Runnable {
      */
     Usuario usuario;
 
+    /**
+     * Status de autenticacao
+     */
+    boolean isAuth;
     
 
     /**
@@ -61,8 +71,9 @@ public class ConnectCliente implements Runnable {
      */
     public ConnectCliente(Socket socketCliente, Map<String, PrintStream> usuariosOnline) throws IOException {
         this.socketCliente = socketCliente;
-        receive = new Scanner(socketCliente.getInputStream());
-        sender = new PrintStream(socketCliente.getOutputStream());
+        this.isAuth = false;
+        this.receive = new Scanner(socketCliente.getInputStream());
+        this.sender = new PrintStream(socketCliente.getOutputStream());
         PomboServidor.usuariosOnline = usuariosOnline;
     }
 
@@ -73,160 +84,161 @@ public class ConnectCliente implements Runnable {
     public void run() {
         System.out.println("#conexão ESTABELECIDA com o cliente " + socketCliente.getInetAddress().getHostAddress() + " #");
 
-        /**
-         * 1º PASSO: espera usuario se logar.
-         */
         while (receive.hasNextLine()) {
-            if (initAutenticacao()) {
-                break;
-            }
+            novaComunicacao(receive.nextLine());
         }
-        /**
-         * 2º PASSO: envia lista de usuarios.
-         */
-        while (receive.hasNextLine()) {
-            enviarListaUsuarios();
-            break;
-        }
-        /**
-         * 3º PASSO: inicia a comunicação de troca de mensagens do bate papo.
-         */
-        while (receive.hasNextLine()) {
-            initComunicacao();
-        }
-
-        /**
-         * 4º PASSO: encerrra conexão com cliente.
-         */
+        avisarOffline();
+        
         try {
             encerraConexao();
         } catch (IOException ex) {
             Logger.getLogger(ConnectCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        
         System.out.println("#Conexão ENCERRADA com o cliente " + socketCliente.getInetAddress().getHostAddress() + " #");
     }
-
+    
     /**
-     * Envia lista de todos os usuarios para o cliente que solicitou.
-     */
-    private void enviarListaUsuarios() {
-        String json = receive.nextLine();
-        Map<String, String> dados = new Gson().fromJson(json, Map.class);
-        String tipo = dados.get("tipo");
-        if (tipo.equals("list_all_users")) {
-            List<Usuario> usuarios = new DAOUsuario().listAll(usuario.getUsername());
-            //altera quem está online
-            for (Usuario u : usuarios) {
-                if (PomboServidor.usuariosOnline.containsKey(u.getUsername())) {
-                    u.setAtivo(true);
-                }
-            }
-            sender.println(new Gson().toJson(usuarios));
-        }
-    }
-
-    /**
-     * Valida comunicação inicial entre cliente e servidor verifica se usuario
-     * está fazendo login ou criando nova conta, Retonra true apenas quando
-     * usuario consegue fazer login
-     *
-     * @return
-     */
-    private boolean initAutenticacao() {
-        boolean result = false;
-        //recebe json enviado pelo usuario
-        String json = receive.nextLine();
-        //converte json
-        Map<String, String> dados = new Gson().fromJson(json, Map.class);
-        //recupera tipo de ação que usuario deseja realizar ("auth": fazer login/ "new_account": criar nova conta)
-        String tipo = dados.get("tipo");
-        String username = dados.get("username");//recupera nome de usuario
-        String password = dados.get("password");//recupera senha
-        //vericia se usuario deseja fazer login
-        if (tipo.equals("auth")) {
-            if (autenticarUsuario(username, password)) {
-                result = true;
-            }
-        }
-        //verifica se usuario deseja criar nova conta
-        if (tipo.equals("new_account")) {
-            //apenas cria conta do usuario, não sai do laço while
-            criarConta(username, password);
-        }
-        return result;
-    }
-
-    /**
-     * Inicia loop de comunicação infinita com cliente, ou até cliente encerrar
+     * Inicia loop de comunicação "infinita" com cliente, ou até cliente encerrar
      * comunicação.
      *
      * @throws IOException
      */
-    private void initComunicacao() {
-        Gson gson = new Gson();
-        //le json enviado pelo remetente
-        String json = receive.nextLine();
-        //recupera mensagens de dados do remetente, que contem usuario destinatario e mensagem.
-        Message message = gson.fromJson(json, Message.class);
-        //adiciona remetente na mensagem
-        message.setRemetente(usuario.getUsername());
-        System.out.println("Mensagem transmitida: de '"+message.getRemetente()+"' para '"+message.getDestinatario()+"'");
-        
-        //recuperara destinatario da mensagem
-        String destinatario = message.getDestinatario();
-        //recupera printStream do destinatario para enviar a mensagem
-        PrintStream senderDestinatario = getPrintStreamDestinatario(destinatario);
-        //se sender estiver online envia mensagem
-        if (senderDestinatario != null) {
-            //envia mensagem ao destinatario
-            senderDestinatario.println(gson.toJson(message));
-        } //se nao estiver online entao salve a mensagem para enviar quando estiver online
-        else {
-            //...
+    private void novaComunicacao(String json) {
+        //recupera mensagens de dados do remetente.
+        Message message = new Gson().fromJson(json, Message.class);
+        //verifica que tipo de mensagem cliente enviou
+        switch(message.getTipo()){
+            case AUTH:
+                autenticarUsuario(message);
+                break;
+            case LISTA_CONTATOS:
+                if(isAuth) enviarListaUsuarios();
+                break;
+            case NOVA_CONTA:
+                criarConta(message);
+                break;
+            case NOVA_MENSAGEM:
+                if(isAuth) enviarMensagemParaDestinatario(message);
+                break;
         }
+        
     }
-
-    /**
-     * Método responsável por autenticar usuario.
-     */
-    private boolean autenticarUsuario(String username, String password) {
-        usuario = new Usuario();
-        usuario.setUsername(username);
-        usuario.setPassword(password);
+    private void autenticarUsuario(Message message){
+        String username = message.getRemetente().getUsername().toLowerCase();
+        String password = message.getRemetente().getPassword();
+        
         DAOUsuario dao = new DAOUsuario();
-        //Autentica usuario com dados do banco de dados
-        if (dao.autentica(username, password)) {
+        if(dao.autentica(username,password)){
             //envia resposta para usuario dizendo que está autorizado
-            sender.println(OK);
-            //adiciona usuario para lista de usuarios
+            this.sender.println(OK);
+            //flag de autorização para cliente enviar msg para outros
+            this.isAuth=true;
+            //salva usuario corrente
+            this.usuario = message.getRemetente();
+            this.usuario.setUsername(username);
+            //limpa a senha deste usuario para não enviar senha a outros usuarios
+            this.usuario.setPassword(null);
+            //adiciona usuario para lista de usuarios online
             PomboServidor.usuariosOnline.put(usuario.getUsername(), sender);
-            return true;
-        } else {
+            //envia lista de usuarios para cliente
+            enviarListaUsuarios();
+            avisarOnline();
+        }else{
             //envia resposta para usuario dizendo que está sem autorização para login
             sender.println(SEM_AUTORIZACAO);
-            return false;
         }
     }
-
+     
     /**
-     * Metodo responsável por criar nova conta de usuario.
-     *
-     * @param username
-     * @param password
+     * Método responsável por criar conta do usuario, só deve criar se username não existir
+     * @param message 
      */
-    private void criarConta(String username, String password) {
+    private void criarConta(Message message){
+        String username = message.getRemetente().getUsername().toLowerCase();
+        String password = message.getRemetente().getPassword();
         DAOUsuario dao = new DAOUsuario();
         //verifica se usuario ja existe
         if (!dao.existe(username)) {
             //se não existir cadastra usuario
-            dao.inserir(new Usuario(username, password));
+            dao.inserir(message.getRemetente());
+            System.out.println(": Nova conta criada: USERNAME "+username);
             //envia resposta ao usuario
             sender.println(OK);
         } else {
             //envia resposta ao usuario
             sender.println(FOUND);
         }
+    }            
+    
+    /**
+     * Método responsável por avisar todos os usuarios online que este ficou offline.
+     */
+    private void avisarOffline(){
+        if(usuario!=null){
+            Message message = new Message();
+            message.setTipo(USER_OFFLINE);
+            message.setRemetente(usuario);
+            String json = new Gson().toJson(message);
+            PomboServidor.distribuirMensagem(json,usuario.getUsername());
+        }
+    }
+    
+    /**
+     * Método responsável avisar todos os usuarios online que este ficou online.
+     */
+    private void avisarOnline(){
+        Message message = new Message();
+        message.setTipo(USER_ONLINE);
+        message.setRemetente(usuario);
+        String json = new Gson().toJson(message);
+        PomboServidor.distribuirMensagem(json,usuario.getUsername());
+    }
+    
+    /**
+     * Método responsável por envia lista de todos os usuarios.
+     */
+    private void enviarListaUsuarios() {
+        Message message = new Message();
+        //seta tipo da mensagem
+        message.setTipo(LISTA_CONTATOS);
+        //recupera todos os usuario do banco de dados
+        List<Usuario> usuarios = new DAOUsuario().listAll(usuario.getUsername());
+        //altera quem está online
+        for (Usuario u : usuarios) {
+            if (PomboServidor.usuariosOnline.containsKey(u.getUsername())) {
+                u.setAtivo(true);
+            }
+        }
+        //Transforma lista de usuarios em JSON e adicona como corpo da Mensagem
+        message.setMsg(new Gson().toJson(usuarios));
+        //transforma mensagem em JSON e envia para cliente;
+        sender.println(message.toJson());
+        
+    }
 
+    
+
+    /**
+     * Método responsável por enviar mensagem para um destinatário
+     * @param message 
+     */
+    private void enviarMensagemParaDestinatario(Message message){
+        //adiciona remetente na mensagem
+        message.setRemetente(usuario);
+        System.out.println(": Nova mensagem transmitida: de '"+message.getRemetente().getUsername()+"' para '"+message.getDestinatario().getUsername()+"'");
+        //recupera printStream do destinatario para enviar a mensagem
+        PrintStream senderDestinatario = getPrintStreamDestinatario(message.getDestinatario());
+        //se sender estiver online envia mensagem
+        if (senderDestinatario != null) {
+            //envia mensagem ao destinatario
+            senderDestinatario.println(new Gson().toJson(message));
+        } 
+        //se nao estiver online entao salve a mensagem para enviar quando estiver online
+        else {
+            //...
+        }
     }
 
     /**
@@ -236,11 +248,11 @@ public class ConnectCliente implements Runnable {
      * @param username
      * @return
      */
-    private PrintStream getPrintStreamDestinatario(String username) {
+    private PrintStream getPrintStreamDestinatario(Usuario destinatario) {
         //verifica se usuario esta online
-        if (PomboServidor.usuariosOnline.containsKey(username)) {
+        if (PomboServidor.usuariosOnline.containsKey(destinatario.getUsername())) {
             //retorna printStream do usuario destinatario
-            return PomboServidor.usuariosOnline.get(username);
+            return PomboServidor.usuariosOnline.get(destinatario.getUsername());
         }
         return null;
     }
@@ -260,10 +272,13 @@ public class ConnectCliente implements Runnable {
                 PomboServidor.usuariosOnline.remove(usuario.getUsername());//remove usuario da lista de usuarios online
             }        //fechar Scanner
         }
-        receive.close();
+        if(receive!=null)
+            receive.close();
         //fecha PrintStram
-        sender.close();
+        if(sender!=null)
+            sender.close();
         //fecha socket do usuario
-        socketCliente.close();
+        if(socketCliente!=null)
+            socketCliente.close();
     }
 }

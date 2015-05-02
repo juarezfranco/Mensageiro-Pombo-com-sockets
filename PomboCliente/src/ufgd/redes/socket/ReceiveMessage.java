@@ -16,6 +16,7 @@ import ufgd.redes.models.Message;
 public class ReceiveMessage implements Runnable{
     MySocket socket;
     Controller controller;
+    
     public ReceiveMessage(Controller controller){
         this.controller = controller;
         this.socket     = controller.getSocket();
@@ -25,6 +26,8 @@ public class ReceiveMessage implements Runnable{
     public void run() {
         while(true){
             String jsonResponse = socket.receiveToServer();
+            if(jsonResponse==null)
+                return;
             Message message   = new Gson().fromJson(jsonResponse, Message.class);
             //passa mensagem para o controller, ele sabe o que fazer com a mensagem
             controller.gerenciarNovaMensagem(message);

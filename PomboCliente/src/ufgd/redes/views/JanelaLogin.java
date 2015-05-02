@@ -5,6 +5,7 @@
  */
 package ufgd.redes.views;
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,8 +34,12 @@ public class JanelaLogin extends javax.swing.JFrame {
             //encerra aplicação
             exit();
         }
+        automatico();
     }
-
+    public void automatico(){
+        textFieldUsername.setText("juarez");
+        passwordField.setText("123");
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -71,6 +76,14 @@ public class JanelaLogin extends javax.swing.JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         textFieldUsername.setFont(new java.awt.Font("Droid Sans", 0, 18)); // NOI18N
+        textFieldUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textFieldUsernameKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textFieldUsernameKeyTyped(evt);
+            }
+        });
 
         labelNome.setFont(new java.awt.Font("Droid Sans", 0, 16)); // NOI18N
         labelNome.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -111,6 +124,12 @@ public class JanelaLogin extends javax.swing.JFrame {
         labelSenha.setFont(new java.awt.Font("Droid Sans", 0, 16)); // NOI18N
         labelSenha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelSenha.setText("Senha");
+
+        passwordField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                passwordFieldKeyPressed(evt);
+            }
+        });
 
         labelNovaConta.setFont(new java.awt.Font("Droid Sans", 0, 16)); // NOI18N
         labelNovaConta.setForeground(new java.awt.Color(70, 83, 254));
@@ -223,6 +242,29 @@ public class JanelaLogin extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosed
 
     private void btEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEntrarActionPerformed
+        entrar();
+    }//GEN-LAST:event_btEntrarActionPerformed
+
+    private void labelNovaContaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelNovaContaMouseClicked
+        new JanelaCadastro(controller);
+    }//GEN-LAST:event_labelNovaContaMouseClicked
+
+    private void textFieldUsernameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldUsernameKeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER)
+            passwordField.requestFocus();
+    }//GEN-LAST:event_textFieldUsernameKeyPressed
+
+    private void passwordFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordFieldKeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER)
+            entrar();
+    }//GEN-LAST:event_passwordFieldKeyPressed
+
+    private void textFieldUsernameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldUsernameKeyTyped
+        if(evt.getKeyChar()==' ')
+            evt.consume();
+    }//GEN-LAST:event_textFieldUsernameKeyTyped
+
+    private void entrar(){
         String username = textFieldUsername.getText().replaceAll(" ", "");
         String password = passwordField.getText().replaceAll(" ", "");
         //valida dados de entrada do usuario
@@ -239,13 +281,7 @@ public class JanelaLogin extends javax.swing.JFrame {
             labelErroLogin.setVisible(true);
         }
         labelAguardeLogin.setVisible(false);
-    }//GEN-LAST:event_btEntrarActionPerformed
-
-    private void labelNovaContaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelNovaContaMouseClicked
-        new JanelaCadastro(controller);
-    }//GEN-LAST:event_labelNovaContaMouseClicked
-
-    
+    }
     private boolean validaEntrada(String username, String password){
         
         boolean flag=true;

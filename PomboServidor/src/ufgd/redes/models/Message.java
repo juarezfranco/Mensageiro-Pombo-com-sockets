@@ -10,41 +10,37 @@ import com.google.gson.Gson;
  */
 public class Message {
 
-    
-    String remetente;
-    String destinatario;
+    String tipo;
+    Usuario remetente;
+    Usuario destinatario;
     String msg;
 
-    /**
-     * Construtor do pacote
-     *
-     * @param remetente
-     * @param msg
-     */
-    public Message(String remetente, String destinatario, String msg) {
-        this.remetente = remetente;
-        this.destinatario =destinatario;
-        this.msg = msg;
+    
+    public String getTipo() {
+        return tipo;
     }
 
-    public String getRemetente() {
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public Usuario getRemetente() {
         return remetente;
     }
 
-    public void setRemetente(String remetente) {
+    public void setRemetente(Usuario remetente) {
         this.remetente = remetente;
     }
 
-    public String getDestinatario() {
+    public Usuario getDestinatario() {
         return destinatario;
     }
 
-    public void setDestinatario(String destinatario) {
+    public void setDestinatario(Usuario destinatario) {
         this.destinatario = destinatario;
     }
 
     
-
     public String getMsg() {
         return msg;
     }

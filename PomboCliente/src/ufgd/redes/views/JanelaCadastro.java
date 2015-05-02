@@ -5,6 +5,7 @@
  */
 package ufgd.redes.views;
 
+import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import ufgd.redes.controllers.Controller;
@@ -15,6 +16,7 @@ import ufgd.redes.controllers.Controller;
  */
 public class JanelaCadastro extends javax.swing.JDialog {
     Controller controller;
+    private int image=-1;
     /**
      * Creates new form JanelaCadastro
      * @param controller
@@ -46,9 +48,10 @@ public class JanelaCadastro extends javax.swing.JDialog {
         labelErroPassword = new javax.swing.JLabel();
         btCriarConta = new javax.swing.JButton();
         labelErroLogin = new javax.swing.JLabel();
-        labelAguardeCadastrando = new javax.swing.JLabel();
         passwordField1 = new javax.swing.JPasswordField();
         labelSenha1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        btEscolherFoto = new javax.swing.JButton();
         jPanelEsquerdo = new javax.swing.JPanel();
         jPanelDireito = new javax.swing.JPanel();
 
@@ -61,7 +64,6 @@ public class JanelaCadastro extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("FreeMono", 1, 45)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 155, 25));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/views/utils/imagens/pombo128x128.png"))); // NOI18N
         jLabel1.setText("Nova conta");
 
         jPanel2.setBackground(new java.awt.Color(254, 254, 254));
@@ -71,6 +73,19 @@ public class JanelaCadastro extends javax.swing.JDialog {
         labelNome.setText("Nome de usuario");
 
         textFieldUsername.setFont(new java.awt.Font("Droid Sans", 0, 18)); // NOI18N
+        textFieldUsername.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldUsernameFocusLost(evt);
+            }
+        });
+        textFieldUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textFieldUsernameKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textFieldUsernameKeyTyped(evt);
+            }
+        });
 
         labelErroUsername.setVisible(false);
         labelErroUsername.setBackground(new java.awt.Color(249, 79, 79));
@@ -84,6 +99,20 @@ public class JanelaCadastro extends javax.swing.JDialog {
         labelSenha.setFont(new java.awt.Font("Droid Sans", 0, 16)); // NOI18N
         labelSenha.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         labelSenha.setText("Senha");
+
+        passwordField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                passwordFieldFocusLost(evt);
+            }
+        });
+        passwordField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                passwordFieldKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                passwordFieldKeyTyped(evt);
+            }
+        });
 
         labelErroPassword.setVisible(false);
         labelErroPassword.setBackground(new java.awt.Color(249, 79, 79));
@@ -111,18 +140,29 @@ public class JanelaCadastro extends javax.swing.JDialog {
         labelErroLogin.setName(""); // NOI18N
         labelErroLogin.setOpaque(true);
 
-        labelAguardeCadastrando.setVisible(false);
-        labelAguardeCadastrando.setBackground(new java.awt.Color(27, 237, 42));
-        labelAguardeCadastrando.setFont(new java.awt.Font("Droid Sans", 1, 14)); // NOI18N
-        labelAguardeCadastrando.setForeground(new java.awt.Color(254, 254, 254));
-        labelAguardeCadastrando.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelAguardeCadastrando.setText("Aguarde, criando cadastro ...");
-        labelAguardeCadastrando.setName(""); // NOI18N
-        labelAguardeCadastrando.setOpaque(true);
+        passwordField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                passwordField1KeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                passwordField1KeyTyped(evt);
+            }
+        });
 
         labelSenha1.setFont(new java.awt.Font("Droid Sans", 0, 16)); // NOI18N
         labelSenha1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         labelSenha1.setText("Repita a senha");
+
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/-1.jpeg"))); // NOI18N
+        jLabel2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        btEscolherFoto.setText("escolher foto");
+        btEscolherFoto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btEscolherFotoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -131,53 +171,56 @@ public class JanelaCadastro extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(50, 50, 50)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(passwordField)
+                    .addComponent(textFieldUsername, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(labelErroUsername, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labelErroPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(passwordField1)
+                    .addComponent(labelSenha1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labelSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(45, 45, 45)
-                        .addComponent(btCriarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(76, 76, 76))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(passwordField)
-                            .addComponent(textFieldUsername, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(labelErroUsername, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(labelErroPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(passwordField1)
-                            .addComponent(labelSenha1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(labelSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(labelNome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(50, 50, 50))))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+                        .addComponent(labelNome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(72, 72, 72)))
+                .addGap(50, 50, 50))
+            .addComponent(labelErroLogin, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(155, 155, 155)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelErroLogin, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(labelAguardeCadastrando, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addComponent(btEscolherFoto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(143, 143, 143))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btCriarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(78, 78, 78))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addComponent(labelErroLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(labelAguardeCadastrando, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
+                .addGap(10, 10, 10)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btEscolherFoto)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labelNome, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(textFieldUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(labelErroUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(labelSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labelSenha1, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(passwordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(labelErroPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(35, 35, 35)
                 .addComponent(btCriarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         jPanelEsquerdo.setBackground(new java.awt.Color(254, 254, 254));
@@ -247,31 +290,104 @@ public class JanelaCadastro extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btCriarContaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCriarContaActionPerformed
-        labelAguardeCadastrando.setVisible(true);
+        criarConta();
+    }//GEN-LAST:event_btCriarContaActionPerformed
+
+    /**
+     * impede usuario de colocar espaços no username
+     * @param evt 
+     */
+    private void textFieldUsernameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldUsernameKeyTyped
+        if(evt.getKeyChar()==' ')
+            evt.consume();
+    }//GEN-LAST:event_textFieldUsernameKeyTyped
+
+    /**
+     * remove espaços em branco ao tirar foco do textField,
+     * limpa espaços em branco ao usuario copiar e colar um texto
+     * @param evt 
+     */
+    private void textFieldUsernameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldUsernameFocusLost
+        String username = textFieldUsername.getText();
+        textFieldUsername.setText(username.replace(" ", ""));
+    }//GEN-LAST:event_textFieldUsernameFocusLost
+
+    /**
+     * Impede entrada de espaço em branco na senha
+     * @param evt 
+     */
+    private void passwordFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordFieldKeyTyped
+        if(evt.getKeyChar()==' ')
+            evt.consume();
+    }//GEN-LAST:event_passwordFieldKeyTyped
+
+    /**
+     * Impede entrada de espaço em branco na senha
+     * @param evt 
+     */
+    private void passwordField1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordField1KeyTyped
+        if(evt.getKeyChar()==' ')
+            evt.consume();
+    }//GEN-LAST:event_passwordField1KeyTyped
+
+    /**
+     * remove espaços em branco da senha
+     * @param evt 
+     */
+    private void passwordFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_passwordFieldFocusLost
+        String username = passwordField.getText();
+        passwordField.setText(username.replace(" ", ""));
+    }//GEN-LAST:event_passwordFieldFocusLost
+
+    private void passwordField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordField1KeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER)
+            criarConta();
+    }//GEN-LAST:event_passwordField1KeyPressed
+
+    private void textFieldUsernameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldUsernameKeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER)
+            passwordField.requestFocus();
+    }//GEN-LAST:event_textFieldUsernameKeyPressed
+
+    private void passwordFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordFieldKeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER)
+            passwordField1.requestFocus();
+    }//GEN-LAST:event_passwordFieldKeyPressed
+
+    private void btEscolherFotoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEscolherFotoActionPerformed
+        new JanelaProfileImagens(this).setVisible(true);;
+    }//GEN-LAST:event_btEscolherFotoActionPerformed
+    
+    
+    public void setImagem(int image){
+        this.image = image;
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+image+".jpeg"))); // NOI18N
+        
+    }
+    private void criarConta(){
+        //labelAguardeCadastrando.setVisible(true);
         
         String username = textFieldUsername.getText().replaceAll(" ", "");
         String password = passwordField.getText().replaceAll(" ", "");
         String password2 = passwordField1.getText().replaceAll(" ", "");
         //valida dados de entrada do usuario
-        if(!validaEntrada(username, password, password2)){
-            labelAguardeCadastrando.setVisible(false);
+        if(!validaEntrada(username, password, password2,image)){
+            //labelAguardeCadastrando.setVisible(false);
             return;
         }        
         
         
-        if(controller.criarConta(username, password)){
-            labelAguardeCadastrando.setVisible(false);
+        if(controller.criarConta(username, password, image)){
+            //labelAguardeCadastrando.setVisible(false);
             JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso", "Nova conta - Pombo", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         }else{
             labelErroLogin.setText("Usuario já existe");
             labelErroLogin.setVisible(true);
         }
-        labelAguardeCadastrando.setVisible(false);
-        
-    }//GEN-LAST:event_btCriarContaActionPerformed
-
-    private boolean validaEntrada(String username, String password, String password2){
+        //labelAguardeCadastrando.setVisible(false);
+    }
+    private boolean validaEntrada(String username, String password, String password2,int image){
         
         boolean flag=true;
         labelErroUsername.setVisible(false);
@@ -302,18 +418,24 @@ public class JanelaCadastro extends javax.swing.JDialog {
                     labelErroPassword.setVisible(true);
                     flag = false;
                 }
+        if(image==-1){
+            JOptionPane.showMessageDialog(this, "Escolha uma imagem.", "O pombo diz:", JOptionPane.ERROR_MESSAGE);
+            flag=false;
+        }
+            
         return flag;
     }
    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCriarConta;
+    private javax.swing.JButton btEscolherFoto;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanelDireito;
     private javax.swing.JPanel jPanelEsquerdo;
     private javax.swing.JPanel jPanelMain;
-    private javax.swing.JLabel labelAguardeCadastrando;
     private javax.swing.JLabel labelErroLogin;
     private javax.swing.JLabel labelErroPassword;
     private javax.swing.JLabel labelErroUsername;
