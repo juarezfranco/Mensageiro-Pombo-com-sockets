@@ -109,7 +109,7 @@ public class ItemToJList extends javax.swing.JPanel implements ListCellRenderer 
         }
         return this;
     }
-    private Icon getImage(int image){
-        return new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+image+".jpeg")); // NOI18N
+    private Icon getImage(String image){
+        return new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+image)); // NOI18N
     }
 }

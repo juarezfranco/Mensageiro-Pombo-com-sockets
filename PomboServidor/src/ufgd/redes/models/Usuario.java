@@ -13,7 +13,7 @@ public class Usuario  implements java.io.Serializable {
      private Integer id;
      private String username;
      private String password;
-     private int image;
+     private String image;
      private boolean ativo = false;
      private Date lastLogin;
      private Date dateCreate;
@@ -36,11 +36,11 @@ public class Usuario  implements java.io.Serializable {
         this.id = id;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
     }
     

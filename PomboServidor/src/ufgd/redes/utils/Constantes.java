@@ -20,6 +20,8 @@ public class Constantes {
     public static final String NOVA_MENSAGEM="nova_mensagem";
     public static final String LISTA_CONTATOS="lista_contatos";
     public static final String ENCERRAR_SESSAO="encerrar_sessao";
+    public static final String UPDATE_PERFIL="update_perfil";
+    public static final String ACAO="acao";
     /** FIM TIPOS DE MENSAGEM **/
     
     public static final String USER ="user";

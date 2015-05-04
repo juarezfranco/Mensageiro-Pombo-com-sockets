@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import ufgd.redes.models.Message;
 
 /**
  *
@@ -47,14 +48,14 @@ public class PomboServidor {
     
     /**
      * Função respnsável por enviar mensagem para todos os usuarios online
-     * @param msg 
-     * @param excetoUsuario 
+     * @param message
      */
-    public static void distribuirMensagem(String msg, String excetoUsuario){
+    public static void distribuirMensagem(Message message){
+        
         for(Entry<String,PrintStream>entry : usuariosOnline.entrySet()){
-            if(!excetoUsuario.equals(entry.getKey())){
+            if(!message.getRemetente().getUsername().equals(entry.getKey())){
                 PrintStream print = entry.getValue();
-                print.println(msg);
+                print.println(message.toJson());
             }
         }
     }    

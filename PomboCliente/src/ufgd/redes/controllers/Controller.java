@@ -11,14 +11,18 @@ import ufgd.redes.models.Usuario;
 import ufgd.redes.socket.MySocket;
 import ufgd.redes.socket.ReceiveMessage;
 import ufgd.redes.utils.ConfigProperties;
+import static ufgd.redes.utils.Constantes.ACAO;
 import static ufgd.redes.utils.Constantes.NOVA_MENSAGEM;
 import static ufgd.redes.utils.Constantes.USER_OFFLINE;
 import static ufgd.redes.utils.Constantes.USER_ONLINE;
 import static ufgd.redes.utils.Constantes.AUTH;
+import static ufgd.redes.utils.Constantes.DIGITANDO;
 import static ufgd.redes.utils.Constantes.ENCERRAR_SESSAO;
 import static ufgd.redes.utils.Constantes.LISTA_CONTATOS;
+import static ufgd.redes.utils.Constantes.NOT_DIGITANDO;
 import static ufgd.redes.utils.Constantes.NOVA_CONTA;
 import static ufgd.redes.utils.Constantes.OK;
+import static ufgd.redes.utils.Constantes.UPDATE_PERFIL;
 import ufgd.redes.views.JanelaMain;
 
 /**
@@ -41,28 +45,51 @@ public class Controller {
         
         this.contexto = contexto;
     }
-    
+    /**
+     * Método resposável por gerenciar as novas mensagens que chegam
+     * @param message 
+     */
     public void gerenciarNovaMensagem(Message message) {
         String tipo = message.getTipo();
         switch(tipo){
             case NOVA_MENSAGEM:
                 novaMensagem(message);
                 break;
-            case USER_ONLINE:
-                novoUserOnline(message);
-                break;
-            case USER_OFFLINE:
-                novoUserOffline(message);
-                break;
             case LISTA_CONTATOS:
                 listaContatos(message);
+                break;
+            case UPDATE_PERFIL:
+                atualizarPerfilContato(message);
                 break;
             case ENCERRAR_SESSAO:
                 encerrarAplicacao();
                 break;
+            case ACAO:
+                novaAcao(message);
+                break;
                 
         }
         
+    }
+    private void novaAcao(Message message){
+        if(message.getMsg().equals(DIGITANDO)){
+            contexto.atualizarAcao(message);
+        }
+            
+    }
+    
+    public void digitando(Usuario destinatario, boolean youare) {
+        Message message = new Message();
+        message.setTipo(ACAO);
+        message.setDestinatario(destinatario);
+        if(youare)
+            message.setMsg(DIGITANDO);
+        else
+            message.setMsg(NOT_DIGITANDO);
+        socket.sendToServer(message.toJson());
+    }
+    private void atualizarPerfilContato(Message message){
+        contexto.atualizarPerfilContato(message.getRemetente());
     }
     private void encerrarAplicacao(){
         
@@ -76,15 +103,7 @@ public class Controller {
         contexto.preencherListaContatos(contatos);
     }
     
-    private void novoUserOffline(Message message){
-        Usuario contatoOffline = message.getRemetente();
-        contexto.novoContatoOffline(contatoOffline);
-    }
-    
-    private void novoUserOnline(Message message){
-        Usuario contatoOnline = message.getRemetente();
-        contexto.novoContatoOnline(contatoOnline);
-    }
+   
     private void novaMensagem(Message message){
         Usuario remetente = message.getRemetente();
         String msg = message.getMsg();
@@ -118,10 +137,20 @@ public class Controller {
         socket.sendToServer(message.toJson());
         //recebe resposta do servidor
         String resposta = socket.receiveToServer();
-        //retorna boolean indicando se está autorizado ou nao
-        return resposta.equals(OK);
+        message = new Gson().fromJson(resposta, Message.class);
+        if(message.getMsg().equals(OK)){
+            usuario = message.getDestinatario();
+            return true;
+        }
+        return false;
     }
-    
+    public void updateUsuario(){
+        Message message = new Message();
+        message.setTipo(UPDATE_PERFIL);
+        message.setRemetente(usuario);
+        socket.sendToServer(message.toJson());
+        
+    }
     /**
      * Solicita ao servidor para criar nova conta de usuario se possível
      * @param username
@@ -129,7 +158,7 @@ public class Controller {
      * @param image
      * @return 
      */
-    public boolean criarConta(String username, String password, int image){
+    public boolean criarConta(String username, String password, String image){
         Message message = new Message();
         message.setTipo(NOVA_CONTA);
         message.setRemetente(new Usuario(username,password,image));
@@ -183,7 +212,5 @@ public class Controller {
 
     public void setSocket(MySocket socket) {
         this.socket = socket;
-    }
-    
-    
+    }   
 }

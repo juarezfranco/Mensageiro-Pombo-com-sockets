@@ -6,6 +6,7 @@
 package ufgd.redes.views;
 
 import javax.swing.JFrame;
+import ufgd.redes.interfaces.Contexto;
 
 /**
  *
@@ -13,12 +14,12 @@ import javax.swing.JFrame;
  */
 public class JanelaProfileImagens extends javax.swing.JDialog {
 
-    JanelaCadastro contexto;
+    Contexto contexto;
     /**
      * Creates new form JanelaProfileImagens
      * @param contexto
      */
-    public JanelaProfileImagens(JanelaCadastro contexto) {
+    public JanelaProfileImagens(Contexto contexto) {
         super(new JFrame(),true);
         this.contexto = contexto;
         initComponents();
@@ -381,122 +382,122 @@ public class JanelaProfileImagens extends javax.swing.JDialog {
     }//GEN-LAST:event_labelSairMouseClicked
 
     private void btImage1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage1ActionPerformed
-        contexto.setImagem(1);
+        contexto.alterarFoto("1.jpeg");
         dispose();
     }//GEN-LAST:event_btImage1ActionPerformed
 
     private void btImage3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage3ActionPerformed
-        contexto.setImagem(2);
+        contexto.alterarFoto("2.jpeg");
         dispose();
     }//GEN-LAST:event_btImage3ActionPerformed
 
     private void btImage2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage2ActionPerformed
-        contexto.setImagem(3);
+        contexto.alterarFoto("3.jpeg");
         dispose();
     }//GEN-LAST:event_btImage2ActionPerformed
 
     private void btImage5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage5ActionPerformed
-        contexto.setImagem(4);
+        contexto.alterarFoto("4.jpeg");
         dispose();
     }//GEN-LAST:event_btImage5ActionPerformed
 
     private void btImage6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage6ActionPerformed
-        contexto.setImagem(5);
+        contexto.alterarFoto("5.jpeg");
         dispose();
     }//GEN-LAST:event_btImage6ActionPerformed
 
     private void btImage10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage10ActionPerformed
-        contexto.setImagem(22);
+        contexto.alterarFoto("22.jpeg");
         dispose();
     }//GEN-LAST:event_btImage10ActionPerformed
 
     private void btImage8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage8ActionPerformed
-        contexto.setImagem(6);
+        contexto.alterarFoto("6.jpeg");
         dispose();
     }//GEN-LAST:event_btImage8ActionPerformed
 
     private void btImage9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage9ActionPerformed
-        contexto.setImagem(7);
+        contexto.alterarFoto("7.jpeg");
         dispose();
     }//GEN-LAST:event_btImage9ActionPerformed
 
     private void btImage7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage7ActionPerformed
-        contexto.setImagem(8);
+        contexto.alterarFoto("8.jpeg");
         dispose();
     }//GEN-LAST:event_btImage7ActionPerformed
 
     private void btImage11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage11ActionPerformed
-        contexto.setImagem(9);
+        contexto.alterarFoto("9.jpeg");
         dispose();
     }//GEN-LAST:event_btImage11ActionPerformed
 
     private void btImage12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage12ActionPerformed
-        contexto.setImagem(10);
+        contexto.alterarFoto("10.jpeg");
         dispose();
     }//GEN-LAST:event_btImage12ActionPerformed
 
     private void btImage23ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage23ActionPerformed
-        contexto.setImagem(23);
+        contexto.alterarFoto("23.jpeg");
         dispose();
     }//GEN-LAST:event_btImage23ActionPerformed
 
     private void btImage14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage14ActionPerformed
-        contexto.setImagem(11);
+        contexto.alterarFoto("11.jpeg");
         dispose();
     }//GEN-LAST:event_btImage14ActionPerformed
 
     private void btImage15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage15ActionPerformed
-        contexto.setImagem(12);
+        contexto.alterarFoto("12.jpeg");
         dispose();
     }//GEN-LAST:event_btImage15ActionPerformed
 
     private void btImage13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage13ActionPerformed
-        contexto.setImagem(13);
+        contexto.alterarFoto("13.jpeg");
         dispose();
     }//GEN-LAST:event_btImage13ActionPerformed
 
     private void btImage17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage17ActionPerformed
-        contexto.setImagem(14);
+        contexto.alterarFoto("14.jpeg");
         dispose();
     }//GEN-LAST:event_btImage17ActionPerformed
 
     private void btImage18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage18ActionPerformed
-        contexto.setImagem(15);
+        contexto.alterarFoto("15.jpeg");
         dispose();
     }//GEN-LAST:event_btImage18ActionPerformed
 
     private void btImage24ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage24ActionPerformed
-        contexto.setImagem(24);
+        contexto.alterarFoto("24.jpeg");
         dispose();
     }//GEN-LAST:event_btImage24ActionPerformed
 
     private void btImage21ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage21ActionPerformed
-        contexto.setImagem(16);
+        contexto.alterarFoto("16.jpeg");
         dispose();
     }//GEN-LAST:event_btImage21ActionPerformed
 
     private void btImage16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage16ActionPerformed
-        contexto.setImagem(17);
+        contexto.alterarFoto("17.jpeg");
         dispose();
     }//GEN-LAST:event_btImage16ActionPerformed
 
     private void btImage22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage22ActionPerformed
-        contexto.setImagem(18);
+        contexto.alterarFoto("18.jpeg");
         dispose();
     }//GEN-LAST:event_btImage22ActionPerformed
 
     private void btImage19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage19ActionPerformed
-        contexto.setImagem(26);
+        contexto.alterarFoto("26.jpeg");
         dispose();
     }//GEN-LAST:event_btImage19ActionPerformed
 
     private void btImage20ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage20ActionPerformed
-        contexto.setImagem(20);
+        contexto.alterarFoto("20.jpeg");
         dispose();
     }//GEN-LAST:event_btImage20ActionPerformed
 
     private void btImage25ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btImage25ActionPerformed
-        contexto.setImagem(25);
+        contexto.alterarFoto("25.jpeg");
         dispose();
     }//GEN-LAST:event_btImage25ActionPerformed
 

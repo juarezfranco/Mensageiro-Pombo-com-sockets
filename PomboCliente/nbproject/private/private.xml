@@ -5,8 +5,8 @@
         <group>
             <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/components/ItemToJList.java</file>
             <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/JanelaMain.java</file>
-            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/JanelaProfileImagens.java</file>
-            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/JanelaCadastro.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/views/PanelConversa.java</file>
+            <file>file:/home/franco/NetBeansProjects/sockets/PomboCliente/src/ufgd/redes/controllers/Controller.java</file>
         </group>
     </open-files>
 </project-private>

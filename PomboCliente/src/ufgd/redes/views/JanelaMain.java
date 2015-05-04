@@ -5,6 +5,8 @@
  */
 package ufgd.redes.views;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,16 +17,21 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import ufgd.redes.controllers.Controller;
+import ufgd.redes.interfaces.Contexto;
+import ufgd.redes.models.Message;
 import ufgd.redes.models.Usuario;
+import ufgd.redes.utils.Util;
 import ufgd.redes.views.components.ItemToJList;
 import ufgd.redes.views.components.TituloAbas;
 /**
  *
  * @author franco
  */
-public class JanelaMain extends javax.swing.JFrame {
+public class JanelaMain extends javax.swing.JFrame implements Contexto{
     /**
      * Controller da aplicação.
      */
@@ -52,8 +59,10 @@ public class JanelaMain extends javax.swing.JFrame {
         //faz referencia da janelaMain para o controller, o controller precisa conhecer quem é a Main
         this.controller.setContexto(this);
         this.labelUsername.setText(controller.getUsuario().getUsername());
+        this.labelUsername.setToolTipText(controller.getUsuario().getUsername());
+        this.labelProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+controller.getUsuario().getImage())));
         //inicializa a lista de abas de conversas abertas.
-        conversasAbertas = new HashMap();
+        this.conversasAbertas = new HashMap();
         //inicia thread responsável por receber mensagens do servidor
         this.controller.iniciarThreadReceiveMessage();
         //exibe janela
@@ -62,6 +71,14 @@ public class JanelaMain extends javax.swing.JFrame {
         
     }
 
+     @Override
+    public void alterarFoto(String imagem) {
+        controller.getUsuario().setImage(imagem);
+        //atualiza dados do usuario no servidor
+        controller.updateUsuario();
+        labelProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+imagem)));
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -72,15 +89,18 @@ public class JanelaMain extends javax.swing.JFrame {
     private void initComponents() {
 
         panelMain = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        jLabelContatos = new javax.swing.JLabel();
+        jScrollPaneContatos = new javax.swing.JScrollPane();
         jListContatos = new javax.swing.JList();
         tabbedPane = new javax.swing.JTabbedPane();
+        labelProfile = new javax.swing.JLabel();
         labelUsername = new javax.swing.JLabel();
+        btOpcoes = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Pombo");
         setBackground(new java.awt.Color(254, 254, 254));
+        setIconImage(Util.getIconeJanela());
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);
@@ -89,9 +109,9 @@ public class JanelaMain extends javax.swing.JFrame {
 
         panelMain.setBackground(java.awt.Color.white);
 
-        jLabel1.setFont(new java.awt.Font("Droid Sans", 0, 18)); // NOI18N
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("<html>Contatos</html>");
+        jLabelContatos.setFont(new java.awt.Font("Aegean", 1, 18)); // NOI18N
+        jLabelContatos.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelContatos.setText("<html>Contatos</html>");
 
         jListContatos.setFont(new java.awt.Font("Droid Sans", 0, 18)); // NOI18N
         jListContatos.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -99,37 +119,68 @@ public class JanelaMain extends javax.swing.JFrame {
                 jListContatosMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(jListContatos);
+        jScrollPaneContatos.setViewportView(jListContatos);
 
         tabbedPane.setBorder(null);
         tabbedPane.setFont(new java.awt.Font("Droid Sans", 0, 18)); // NOI18N
+        tabbedPane.setOpaque(true);
 
-        labelUsername.setFont(new java.awt.Font("Droid Sans", 0, 13)); // NOI18N
-        labelUsername.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        labelUsername.setText("myname");
+        labelProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/-1.jpeg"))); // NOI18N
+        labelProfile.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        labelProfile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelProfileMouseClicked(evt);
+            }
+        });
+
+        labelUsername.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
+        labelUsername.setText("nome");
+        labelUsername.setToolTipText("");
+
+        btOpcoes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/config2.png"))); // NOI18N
+        btOpcoes.setBorder(null);
+        btOpcoes.setOpaque(true);
+        btOpcoes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btOpcoesActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelMainLayout = new javax.swing.GroupLayout(panelMain);
         panelMain.setLayout(panelMainLayout);
         panelMainLayout.setHorizontalGroup(
             panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMainLayout.createSequentialGroup()
-                .addGap(6, 6, 6)
                 .addGroup(panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                    .addComponent(jLabel1)
-                    .addComponent(labelUsername, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(6, 6, 6)
+                    .addGroup(panelMainLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(labelProfile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(labelUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btOpcoes)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                    .addGroup(panelMainLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabelContatos, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelMainLayout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jScrollPaneContatos, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 533, Short.MAX_VALUE))
         );
         panelMainLayout.setVerticalGroup(
             panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(panelMainLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(9, 9, 9)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
-                .addGap(0, 0, 0)
-                .addComponent(labelUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(22, 22, 22)
+                .addGroup(panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelUsername)
+                    .addComponent(btOpcoes)
+                    .addComponent(labelProfile))
+                .addGap(17, 17, 17)
+                .addComponent(jLabelContatos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
+                .addComponent(jScrollPaneContatos, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
+                .addGap(6, 6, 6))
             .addComponent(tabbedPane)
         );
 
@@ -178,7 +229,7 @@ public class JanelaMain extends javax.swing.JFrame {
         }//se não existe aba aberta é preciso criar nova aba
         else{
             //adiciona nova aba no componente TabbedPane
-            PanelConversa panel = new PanelConversa(this, contato);
+            PanelConversa panel = new PanelConversa(controller, contato);
             tabbedPane.addTab(contato.getUsername(),panel);
             //seleciona para exibir nova aba que foi criada
             tabbedPane.setSelectedIndex(tabbedPane.getTabCount()-1);
@@ -189,6 +240,35 @@ public class JanelaMain extends javax.swing.JFrame {
             conversasAbertas.put(contato.getUsername(), panel);
         }
     }//GEN-LAST:event_jListContatosMouseClicked
+
+    private void btOpcoesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOpcoesActionPerformed
+        
+    }//GEN-LAST:event_btOpcoesActionPerformed
+
+    private void labelProfileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelProfileMouseClicked
+        JMenuItem item = new JMenuItem("alterar imagem");
+        item.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                alterarFoto();
+            }
+        });
+        JPopupMenu popup = new JPopupMenu();
+        popup.add(item);
+        
+        int x = labelProfile.getX()-10;
+        int y = labelProfile.getHeight();
+        popup.show(labelProfile, x, y);
+        
+    }//GEN-LAST:event_labelProfileMouseClicked
+    
+    /**
+     * Método responsável por alterar foto que usuario escolher na janelaProfileImagens
+     */
+    private void alterarFoto(){
+        new JanelaProfileImagens(this).setVisible(true);
+    }
+    
     /**
      * Método responsável por selecionar aba do respectivo usuario passado pelo parametro
      * @param contato 
@@ -201,27 +281,46 @@ public class JanelaMain extends javax.swing.JFrame {
                 tabbedPane.setSelectedIndex(i);
         }
     }
+    
     /**
-     * Método responsável por atualziar status do contato na lista de contatos
-     * @param contatoOnline
+     * Método respnsável por atualizar informações do perfil do contato passado por parametro
+     * @param contato
      */
-    public void novoContatoOnline(Usuario contatoOnline){
+    public void atualizarPerfilContato(Usuario contato){
         int index=0;
         boolean contain = false;
         for(Usuario user : modeloList.listaContatos()){
-            if(user.getUsername().toLowerCase().equals(contatoOnline.getUsername().toLowerCase())){
-                user.setAtivo(true);
+            if(user.getUsername().toLowerCase().equals(contato.getUsername().toLowerCase())){
+                if(!user.isAtivo()&&contato.isAtivo())
+                    Util.exibirNotificacao(contato.getImage(), contato.getUsername(), "está online!");
+                user=contato;
                 modeloList.set(index, user);
                 contain=true;
+                //atualiza status na aba de conversa se estiver aberta
+                if(conversasAbertas.containsKey(contato.getUsername())){
+                    //recupera aba da conversa
+                    PanelConversa panel = conversasAbertas.get(contato.getUsername());
+                    panel.alterarStatus(contato);
+                }
             }
             index++;
         }
         //se não existir contato na lista adiciona
         if(!contain){
-            contatoOnline.setAtivo(true);
-            modeloList.add(contatoOnline);
+            contato.setAtivo(true);
+            modeloList.add(contato);
         }
     }
+    
+    public void atualizarAcao(Message message) {
+       //verifica se conversa está aberta
+       if(conversasAbertas.containsKey(message.getRemetente().getUsername())){ 
+           //recupera aba da conversa
+            PanelConversa panel = conversasAbertas.get(message.getRemetente().getUsername());
+            panel.alterarAcao(message.getMsg());
+       }
+    }
+    
     public void encerrarAplicaAplicacao(){
         
         try {
@@ -233,20 +332,8 @@ public class JanelaMain extends javax.swing.JFrame {
         System.exit(1);
         
     }
-    /**
-     * Método responsável por atualziar status do contato na lista de contatos
-     * @param contatoOffline
-     */
-    public void novoContatoOffline(Usuario contatoOffline){
-        int index=0;
-        for(Usuario user : modeloList.listaContatos()){
-            if(user.getUsername().toLowerCase().equals(contatoOffline.getUsername().toLowerCase())){
-                user.setAtivo(false);
-                modeloList.set(index, user);
-            }
-            index++;
-        }
-    }
+    
+    
     
     /**
      * Método resonsável por adicionar na tela a mensagem recebida.
@@ -256,14 +343,17 @@ public class JanelaMain extends javax.swing.JFrame {
      */
     public void exibirNovaMensageRecebida(Usuario remetente, String msg){
         PanelConversa panel;
+        
         //verifica se aba da conversa ja está aberta
         if(conversasAbertas.containsKey(remetente.getUsername())){
             //recupera aba da conversa
             panel = conversasAbertas.get(remetente.getUsername());
+            if(!panel.isFocusOwner()&& remetente.getImage()!=null)
+                Util.exibirNotificacao(remetente.getImage(), remetente.getUsername(), msg);
             panel.novaMensagem(msg);
         }else{
             //cria uma nova aba de conversa, adiciona nova aba no componente TabbedPane
-            panel = new PanelConversa(this, remetente);
+            panel = new PanelConversa(controller, remetente);
             //envia mensagem para o panel da conversa
             panel.novaMensagem(msg);
             //cria aba
@@ -307,13 +397,16 @@ public class JanelaMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btOpcoes;
+    private javax.swing.JLabel jLabelContatos;
     private javax.swing.JList jListContatos;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPaneContatos;
+    private javax.swing.JLabel labelProfile;
     private javax.swing.JLabel labelUsername;
     private javax.swing.JPanel panelMain;
     private javax.swing.JTabbedPane tabbedPane;
     // End of variables declaration//GEN-END:variables
+
 
     /**
      * Classe modelo personalizado para o jList.

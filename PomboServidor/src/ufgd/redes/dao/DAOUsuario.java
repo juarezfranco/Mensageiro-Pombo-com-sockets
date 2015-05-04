@@ -24,9 +24,44 @@ public class DAOUsuario extends ConnectionFactory {
     public static final String TABELA_MSG_PENDENTES="mensagens_pendentes";
 
     
-    public DAOUsuario() {
+    public DAOUsuario() {}
+    
+    
+    /**
+     * Altera dados do usuario
+     * @param usuario 
+     */
+    public void update(Usuario usuario){
+        String sql = "UPDATE "+TABELA_USUARIOS+" SET image = ? WHERE username = ?";
+        PreparedStatement stmt = null;
+        try {    
+            stmt = getConexao().prepareStatement(sql);
+            stmt.setString(1, usuario.getImage());
+            stmt.setString(2, usuario.getUsername());
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            fecharConexao(stmt,null);   
+        }
+        
     }
-
+    /**
+     * Atualiza ultimo login do usuario
+     * @param usuario 
+     */
+    public void updateLastLogin(Usuario usuario){
+        String sql ="UPDATE "+TABELA_USUARIOS+" SET last_login=now() WHERE USERNAME ='"+usuario.getUsername()+"'";
+        PreparedStatement stmt=null;
+        try {
+            stmt = getConexao().prepareStatement(sql);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            fecharConexao(stmt,null);   
+        }
+    }
     /**
      * Insere usuario na base de dados
      * @param usuario
@@ -42,7 +77,7 @@ public class DAOUsuario extends ConnectionFactory {
             stmt = getConexao().prepareStatement(sql);
             stmt.setString(1, usuario.getUsername().toLowerCase());
             stmt.setString(2, usuario.getPassword());
-            stmt.setInt(3,usuario.getImage());
+            stmt.setString(3,usuario.getImage());
             stmt.execute();
         } catch (SQLException ex) {
             Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);
@@ -88,7 +123,7 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public List<Usuario> listarTodosUsuarios(String username){
         boolean result = false;
-        String sql = "SELECT username, image FROM "+TABELA_USUARIOS+" WHERE username != ? ORDER BY username ASC";
+        String sql = "SELECT username, image, last_login FROM "+TABELA_USUARIOS+" WHERE username != ? ORDER BY username ASC";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Usuario> usuarios = new ArrayList();
@@ -99,7 +134,8 @@ public class DAOUsuario extends ConnectionFactory {
             while(rs.next()){
                 Usuario usuario = new Usuario();
                 usuario.setUsername(rs.getString("username").toLowerCase());
-                usuario.setImage(rs.getInt("image"));
+                usuario.setImage(rs.getString("image"));
+                usuario.setLastLogin(rs.getTimestamp("last_login"));
                 usuarios.add(usuario);
             }
         } catch (SQLException ex) {
@@ -166,9 +202,9 @@ public class DAOUsuario extends ConnectionFactory {
     }
     public List<Message> listarMensagensPendentes(Usuario destinatario){
         
-        String sql = " SELECT id, remetente, mensagem, data "
-                +    " FROM "+TABELA_MSG_PENDENTES
-                +    " WHERE destinatario = ? ORDER BY data ASC";
+        String sql = " SELECT id, remetente, mensagem, data, image, last_login"
+                +    " FROM "+TABELA_MSG_PENDENTES+", "+TABELA_USUARIOS
+                +    " WHERE remetente=username && destinatario = ? ORDER BY data ASC";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Message> mensagens = new ArrayList<Message>();
@@ -180,7 +216,11 @@ public class DAOUsuario extends ConnectionFactory {
             while(rs.next()){
                 Message message = new Message();
                 message.setTipo(NOVA_MENSAGEM);
-                message.setRemetente(new Usuario(rs.getString("remetente")));
+                Usuario usuario = new Usuario();
+                usuario.setUsername(rs.getString("remetente"));
+                usuario.setImage(rs.getString("image"));
+                usuario.setLastLogin(rs.getTimestamp("last_login"));
+                message.setRemetente(usuario);
                 //message.setDestinatario(destinatario);
                 message.setId(rs.getInt("id"));
                 message.setData(rs.getTimestamp("data"));
@@ -205,7 +245,7 @@ public class DAOUsuario extends ConnectionFactory {
             while(rs.next()){
                 usuario = new Usuario();
                 usuario.setUsername(username);
-                usuario.setImage(rs.getInt("image"));
+                usuario.setImage(rs.getString("image"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(DAOUsuario.class.getName()).log(Level.SEVERE, null, ex);

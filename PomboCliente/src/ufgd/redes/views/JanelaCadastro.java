@@ -9,14 +9,16 @@ import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import ufgd.redes.controllers.Controller;
+import ufgd.redes.interfaces.Contexto;
+import ufgd.redes.utils.Util;
 
 /**
  *
  * @author franco
  */
-public class JanelaCadastro extends javax.swing.JDialog {
+public class JanelaCadastro extends javax.swing.JDialog implements Contexto{
     Controller controller;
-    private int image=-1;
+    private String image="-1.jpeg";
     /**
      * Creates new form JanelaCadastro
      * @param controller
@@ -27,7 +29,13 @@ public class JanelaCadastro extends javax.swing.JDialog {
         initComponents();
         setVisible(true);
     }
-
+  
+    @Override
+    public void alterarFoto(String image) {
+        this.image = image;
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+image))); // NOI18N
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -57,6 +65,7 @@ public class JanelaCadastro extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Criar Conta - Pombo");
+        setIconImage(Util.getIconeJanela());
         setType(java.awt.Window.Type.UTILITY);
 
         jPanelMain.setBackground(new java.awt.Color(254, 254, 254));
@@ -355,15 +364,10 @@ public class JanelaCadastro extends javax.swing.JDialog {
     }//GEN-LAST:event_passwordFieldKeyPressed
 
     private void btEscolherFotoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEscolherFotoActionPerformed
-        new JanelaProfileImagens(this).setVisible(true);;
+        new JanelaProfileImagens(this).setVisible(true);
     }//GEN-LAST:event_btEscolherFotoActionPerformed
     
     
-    public void setImagem(int image){
-        this.image = image;
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ufgd/redes/utils/imagens/profiles/"+image+".jpeg"))); // NOI18N
-        
-    }
     private void criarConta(){
         //labelAguardeCadastrando.setVisible(true);
         
@@ -387,7 +391,7 @@ public class JanelaCadastro extends javax.swing.JDialog {
         }
         //labelAguardeCadastrando.setVisible(false);
     }
-    private boolean validaEntrada(String username, String password, String password2,int image){
+    private boolean validaEntrada(String username, String password, String password2,String image){
         
         boolean flag=true;
         labelErroUsername.setVisible(false);
@@ -418,7 +422,7 @@ public class JanelaCadastro extends javax.swing.JDialog {
                     labelErroPassword.setVisible(true);
                     flag = false;
                 }
-        if(image==-1){
+        if(image.equals("-1.jpeg")){
             JOptionPane.showMessageDialog(this, "Escolha uma imagem.", "O pombo diz:", JOptionPane.ERROR_MESSAGE);
             flag=false;
         }
@@ -446,4 +450,6 @@ public class JanelaCadastro extends javax.swing.JDialog {
     private javax.swing.JPasswordField passwordField1;
     private javax.swing.JTextField textFieldUsername;
     // End of variables declaration//GEN-END:variables
+
+    
 }

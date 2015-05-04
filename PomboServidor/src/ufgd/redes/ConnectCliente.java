@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import ufgd.redes.dao.DAOUsuario;
 import ufgd.redes.models.Message;
 import ufgd.redes.models.Usuario;
+import static ufgd.redes.utils.Constantes.ACAO;
 import static ufgd.redes.utils.Constantes.AUTH;
 import static ufgd.redes.utils.Constantes.ENCERRAR_SESSAO;
 import static ufgd.redes.utils.Constantes.FOUND;
@@ -26,6 +27,7 @@ import static ufgd.redes.utils.Constantes.NOVA_CONTA;
 import static ufgd.redes.utils.Constantes.NOVA_MENSAGEM;
 import static ufgd.redes.utils.Constantes.OK;
 import static ufgd.redes.utils.Constantes.SEM_AUTORIZACAO;
+import static ufgd.redes.utils.Constantes.UPDATE_PERFIL;
 import static ufgd.redes.utils.Constantes.USER_OFFLINE;
 import static ufgd.redes.utils.Constantes.USER_ONLINE;
 
@@ -97,7 +99,6 @@ public class ConnectCliente implements Runnable {
             Logger.getLogger(ConnectCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        
         System.out.println("#Conexão ENCERRADA com o cliente " + socketCliente.getInetAddress().getHostAddress() + " #");
     }
     
@@ -121,8 +122,53 @@ public class ConnectCliente implements Runnable {
             case NOVA_MENSAGEM:
                 if(isAuth) enviarMensagemParaDestinatario(message);
                 break;
+            case UPDATE_PERFIL:
+                if(isAuth) atualizarPerfil(message);
+                break;
+            case ACAO:
+                enviarAcao(message);
+                break;
         }
         
+    }
+    /**
+     * Envia ação do usuario para o destinatario, ex: digitando.., enviando arquivo..
+     * @param message 
+     */
+    private void enviarAcao(Message message){
+        message.setRemetente(usuario);
+        if(PomboServidor.usuariosOnline.containsKey(message.getDestinatario().getUsername())){
+            PrintStream print = PomboServidor.usuariosOnline.get(message.getDestinatario().getUsername());
+            print.println(message.toJson());
+        }
+    }
+    private void atualizarPerfil(Message message){
+        usuario = message.getRemetente();
+        new DAOUsuario().update(usuario);
+        //distribui atualização do perfil para outros usuarios
+        Message aviso = new Message();
+        aviso.setTipo(UPDATE_PERFIL);
+        aviso.setRemetente(usuario);
+        PomboServidor.distribuirMensagem(message);
+    }
+    private void avisarOffline(){
+        DAOUsuario dao = new DAOUsuario();
+        dao.updateLastLogin(usuario);
+        if(usuario!=null){
+            Message message = new Message();
+            message.setTipo(UPDATE_PERFIL);
+            usuario.setAtivo(false);
+            usuario.setLastLogin(new Date());
+            message.setRemetente(usuario);
+            PomboServidor.distribuirMensagem(message);
+        }
+    }
+    private void avisarOnline(){
+        Message message = new Message();
+        message.setTipo(UPDATE_PERFIL);
+        usuario.setAtivo(true);
+        message.setRemetente(usuario);
+        PomboServidor.distribuirMensagem(message);
     }
     private void encerrarSessaoAntiga(String username){
         Message message = new Message();
@@ -139,16 +185,21 @@ public class ConnectCliente implements Runnable {
             if(PomboServidor.usuariosOnline.containsKey(username)){
                 encerrarSessaoAntiga(username);
             }
-            //envia resposta para usuario dizendo que está autorizado
-            this.senderToClient.println(OK);
             //flag de autorização para cliente enviar msg para outros
             this.isAuth=true;
             //salva usuario corrente
             this.usuario = dao.getUsuario(username);
             //limpa a senha deste usuario para não enviar senha a outros usuarios
             this.usuario.setPassword(null);
+            this.usuario.setAtivo(true);
             //adiciona usuario para lista de usuarios online
             PomboServidor.usuariosOnline.put(usuario.getUsername(), senderToClient);
+            //envia resposta para usuario dizendo que está autorizado
+            Message resposta = new Message();
+            resposta.setTipo(AUTH);
+            resposta.setDestinatario(usuario);
+            resposta.setMsg(OK);
+            senderToClient.println(resposta.toJson());
             //envia lista de usuarios para cliente
             List<Usuario> listaUsuarios = dao.listarTodosUsuarios(usuario.getUsername());
             enviarListaUsuarios(listaUsuarios);
@@ -158,10 +209,13 @@ public class ConnectCliente implements Runnable {
             avisarOnline();
         }else{
             //envia resposta para usuario dizendo que está sem autorização para login
-            senderToClient.println(SEM_AUTORIZACAO);
+            Message resposta = new Message();
+            resposta.setTipo(AUTH);
+            resposta.setMsg(SEM_AUTORIZACAO);
+            senderToClient.println(resposta.toJson());
         }
     }
-     private void enviarMensagensPendentes(List<Message> mensagensPendentes){
+    private void enviarMensagensPendentes(List<Message> mensagensPendentes){
          for(Message message : mensagensPendentes){
              senderToClient.println(message.toJson());
              DAOUsuario dao = new DAOUsuario();
@@ -188,30 +242,6 @@ public class ConnectCliente implements Runnable {
             senderToClient.println(FOUND);
         }
     }            
-    
-    /**
-     * Método responsável por avisar todos os usuarios online que este ficou offline.
-     */
-    private void avisarOffline(){
-        if(usuario!=null){
-            Message message = new Message();
-            message.setTipo(USER_OFFLINE);
-            message.setRemetente(usuario);
-            String json = new Gson().toJson(message);
-            PomboServidor.distribuirMensagem(json,usuario.getUsername());
-        }
-    }
-    
-    /**
-     * Método responsável avisar todos os usuarios online que este ficou online.
-     */
-    private void avisarOnline(){
-        Message message = new Message();
-        message.setTipo(USER_ONLINE);
-        message.setRemetente(usuario);
-        String json = new Gson().toJson(message);
-        PomboServidor.distribuirMensagem(json,usuario.getUsername());
-    }
     
     /**
      * Método responsável por envia lista de todos os usuarios.

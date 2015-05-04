@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * @author franco
  */
 abstract class ConnectionFactory {
-    private static final String URL = "jdbc:mysql://localhost/pombo";
+    private static final String URL = "jdbc:mysql://localhost/pombo?zeroDateTimeBehavior=convertToNull";
     private static final String USER= "root";
     private static final String PASS= "bola1993";
             

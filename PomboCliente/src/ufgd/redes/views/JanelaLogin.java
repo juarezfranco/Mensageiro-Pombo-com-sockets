@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import ufgd.redes.utils.Util;
 import ufgd.redes.controllers.Controller;
 
 /**
@@ -64,6 +65,7 @@ public class JanelaLogin extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(244, 240, 240));
+        setIconImage(Util.getIconeJanela());
         setResizable(false);
         setType(java.awt.Window.Type.UTILITY);
         addWindowListener(new java.awt.event.WindowAdapter() {

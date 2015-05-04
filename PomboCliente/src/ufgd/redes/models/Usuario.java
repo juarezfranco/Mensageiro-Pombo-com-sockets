@@ -10,13 +10,13 @@ public class Usuario{
 
     private String username;
     private String password;
-    private int image;
+    private String image;
     private boolean ativo=false;
     private Date lastLogin;
     
     public Usuario() {
     }
-    public Usuario(String username,String password,int image){
+    public Usuario(String username,String password,String image){
         this.username = username;
         this.password = password;
         this.image=image;
@@ -25,11 +25,11 @@ public class Usuario{
         this.username = username;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
     }
     
