@@ -21,7 +21,7 @@
 
     c) Se o servidor estiver sendo executado em outro computador, a aplicação dará um erro. Mas um arquivo de configuração será gerado no mesmo diretório do executável. Deve se chamar "config.properties".
 
-         d) Abra o arquivo "config.properties" e altere o ip do servidor.
+    d) Abra o arquivo "config.properties" e altere o ip do servidor.
 
 Dúvidas contato, juarezfrancojr@gmail.com
 
