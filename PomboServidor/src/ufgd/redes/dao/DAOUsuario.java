@@ -69,7 +69,7 @@ public class DAOUsuario extends ConnectionFactory {
      */
     public boolean inserir(Usuario usuario) {
         boolean result = true;
-        String sql = "INSERT INTO " + TABELA_USUARIOS + " (username, password,image) VALUES (? ,?,?)";
+        String sql = "INSERT INTO " + TABELA_USUARIOS + " (username, password,image,last_login) VALUES (? ,?,?,now())";
         
         PreparedStatement stmt=null;
         

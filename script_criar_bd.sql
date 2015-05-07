@@ -6,7 +6,7 @@ create table usuarios(
 	username varchar(100) primary key,
 	password varchar(50) not null,
 	image varchar(50) not null,
-	last_login timestamp default '0000-00-00',
+	last_login timestamp default '0000-00-00 00:00:00',
 	date_create timestamp default now()
 );
 

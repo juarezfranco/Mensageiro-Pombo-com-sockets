@@ -153,8 +153,8 @@ public class ConnectCliente implements Runnable {
     }
     private void avisarOffline(){
         DAOUsuario dao = new DAOUsuario();
-        dao.updateLastLogin(usuario);
         if(usuario!=null){
+            dao.updateLastLogin(usuario);
             Message message = new Message();
             message.setTipo(UPDATE_PERFIL);
             usuario.setAtivo(false);

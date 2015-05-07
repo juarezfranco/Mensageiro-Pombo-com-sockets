@@ -13,8 +13,6 @@ import ufgd.redes.socket.ReceiveMessage;
 import ufgd.redes.utils.ConfigProperties;
 import static ufgd.redes.utils.Constantes.ACAO;
 import static ufgd.redes.utils.Constantes.NOVA_MENSAGEM;
-import static ufgd.redes.utils.Constantes.USER_OFFLINE;
-import static ufgd.redes.utils.Constantes.USER_ONLINE;
 import static ufgd.redes.utils.Constantes.AUTH;
 import static ufgd.redes.utils.Constantes.DIGITANDO;
 import static ufgd.redes.utils.Constantes.ENCERRAR_SESSAO;
